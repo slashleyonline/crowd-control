@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://powkftvbpbvt"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_5glt3"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2mnig"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_5glt3"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_2mnig"]
+
+[node name="Node3D" type="Node3D" unique_id=860773960]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=633370137]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=78782945]
+mesh = SubResource("BoxMesh_5glt3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1973347685]
+shape = SubResource("BoxShape3D_2mnig")
+
+[node name="Pedestrian" type="CharacterBody3D" parent="." unique_id=1701047962]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian" unique_id=2118982375]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian" unique_id=537258759]
+mesh = SubResource("CylinderMesh_2mnig")
