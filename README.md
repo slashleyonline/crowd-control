@@ -57,7 +57,7 @@ Doors, chairs, staring, talking, and formations can be added later if the main s
 - [x] Make a small test map.
 - [ ] Add walkable locations or waypoints.
 - [ ] Add several NPCs to the scene.
-- [ ] Make sure NPCs can navigate around walls and objects.
+- [x] Make sure NPCs can navigate around walls and objects.
 
 ### 2. Basic NPC Movement
 
