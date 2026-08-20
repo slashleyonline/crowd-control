@@ -82,5 +82,209 @@ mesh = SubResource("CylinderMesh_2mnig")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian" unique_id=1742566815]
 
+[node name="Pedestrian2" type="CharacterBody3D" parent="." unique_id=135513922]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, 0)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian2" unique_id=1695703035]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian2" unique_id=2129458044]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian2" unique_id=96442572]
+
+[node name="Pedestrian3" type="CharacterBody3D" parent="." unique_id=867371490]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, 0)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian3" unique_id=117864565]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian3" unique_id=945087569]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian3" unique_id=195670765]
+
+[node name="Pedestrian4" type="CharacterBody3D" parent="." unique_id=1329997304]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 7.4172554)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian4" unique_id=424120543]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian4" unique_id=821328418]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian4" unique_id=1470554826]
+
+[node name="Pedestrian5" type="CharacterBody3D" parent="." unique_id=676080355]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, 7.4172554)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian5" unique_id=1053873705]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian5" unique_id=1438615765]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian5" unique_id=675465668]
+
+[node name="Pedestrian6" type="CharacterBody3D" parent="." unique_id=739572007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, 7.4172554)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian6" unique_id=1326196145]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian6" unique_id=448197032]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian6" unique_id=1906451109]
+
+[node name="Pedestrian7" type="CharacterBody3D" parent="." unique_id=1257142921]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 13.980213)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian7" unique_id=629413156]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian7" unique_id=525323385]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian7" unique_id=217582378]
+
+[node name="Pedestrian8" type="CharacterBody3D" parent="." unique_id=91944407]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, 13.980213)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian8" unique_id=359290197]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian8" unique_id=1130533475]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian8" unique_id=1500959766]
+
+[node name="Pedestrian9" type="CharacterBody3D" parent="." unique_id=1457173724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, 13.980213)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian9" unique_id=1737190815]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian9" unique_id=239156107]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian9" unique_id=181407677]
+
+[node name="Pedestrian10" type="CharacterBody3D" parent="." unique_id=1774337275]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, -10.196762)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian10" unique_id=1854256243]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian10" unique_id=698509418]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian10" unique_id=510469605]
+
+[node name="Pedestrian11" type="CharacterBody3D" parent="." unique_id=629545046]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, -10.196762)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian11" unique_id=180363978]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian11" unique_id=332225821]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian11" unique_id=1206127017]
+
+[node name="Pedestrian12" type="CharacterBody3D" parent="." unique_id=1366204312]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, -10.196762)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian12" unique_id=984921088]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian12" unique_id=384521089]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian12" unique_id=911649239]
+
+[node name="Pedestrian13" type="CharacterBody3D" parent="." unique_id=836069958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, -5.364109)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian13" unique_id=1504868919]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian13" unique_id=1589076338]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian13" unique_id=1731889610]
+
+[node name="Pedestrian14" type="CharacterBody3D" parent="." unique_id=96799561]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, -5.364109)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian14" unique_id=166318162]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian14" unique_id=2051605140]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian14" unique_id=879369219]
+
+[node name="Pedestrian15" type="CharacterBody3D" parent="." unique_id=713064677]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, -5.364109)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian15" unique_id=893041513]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian15" unique_id=151463900]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian15" unique_id=723450365]
+
+[node name="Pedestrian16" type="CharacterBody3D" parent="." unique_id=913912520]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 18.119421)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian16" unique_id=1219748672]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian16" unique_id=1720854508]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian16" unique_id=1537979277]
+
+[node name="Pedestrian17" type="CharacterBody3D" parent="." unique_id=185683089]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, 18.119421)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian17" unique_id=655438205]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian17" unique_id=322616478]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian17" unique_id=1118463500]
+
+[node name="Pedestrian18" type="CharacterBody3D" parent="." unique_id=226238984]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, 18.119421)
+script = ExtResource("1_myinc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian18" unique_id=1418591296]
+shape = SubResource("CylinderShape3D_5glt3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian18" unique_id=704360480]
+mesh = SubResource("CylinderMesh_2mnig")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian18" unique_id=2115948570]
+
 [node name="Camera3D" type="Camera3D" parent="." unique_id=596827014]
 transform = Transform3D(1, 0, 0, 0, 0.7077299, 0.7064831, 0, -0.7064831, 0.7077299, 0, 10.558638, 18.530235)
