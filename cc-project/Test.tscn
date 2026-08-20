@@ -1,5 +1,18 @@
 [gd_scene format=3 uid="uid://powkftvbpbvt"]
 
+[ext_resource type="Script" uid="uid://dvcybdycmv1wc" path="res://crowdAgent.gd" id="1_myinc"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rvu7i"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_myinc"]
+sky_material = SubResource("ProceduralSkyMaterial_rvu7i")
+
+[sub_resource type="Environment" id="Environment_njov2"]
+background_mode = 2
+sky = SubResource("Sky_myinc")
+
 [sub_resource type="BoxMesh" id="BoxMesh_5glt3"]
 size = Vector3(40, 1, 40)
 
@@ -19,6 +32,13 @@ polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
 
 [node name="Node3D" type="Node3D" unique_id=860773960]
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=473693113]
+environment = SubResource("Environment_njov2")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1362216896]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=633370137]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=78782945]
@@ -37,6 +57,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_2mnig")
 
 [node name="Pedestrian" type="CharacterBody3D" parent="." unique_id=1701047962]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 0)
+script = ExtResource("1_myinc")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian" unique_id=2118982375]
 shape = SubResource("CylinderShape3D_5glt3")
@@ -45,3 +66,6 @@ shape = SubResource("CylinderShape3D_5glt3")
 mesh = SubResource("CylinderMesh_2mnig")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian" unique_id=1742566815]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=596827014]
+transform = Transform3D(1, 0, 0, 0, 0.7077299, 0.7064831, 0, -0.7064831, 0.7077299, 0, 10.558638, 18.530235)
