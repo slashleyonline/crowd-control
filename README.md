@@ -61,7 +61,7 @@ Doors, chairs, staring, talking, and formations can be added later if the main s
 
 ### 2. Basic NPC Movement
 
-- [ ] Give each NPC a random destination.
+- [x] Give each NPC a random destination.
 - [ ] Make the NPC wait after reaching a destination.
 - [ ] Choose a new destination after waiting.
 - [ ] Keep NPCs from walking into each other as much as possible.
@@ -69,8 +69,8 @@ Doors, chairs, staring, talking, and formations can be added later if the main s
 
 ### 3. Finite State Machine
 
-- [ ] Create the Idle state.
-- [ ] Create the Walking state.
+- [x] Create the Idle state.
+- [x] Create the Walking state.
 - [ ] Create the Frozen state.
 - [ ] Create the Fleeing state.
 - [ ] Create the Returning state.
