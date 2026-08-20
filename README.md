@@ -19,7 +19,7 @@ The presentation and class reviews make up most of the project grade, so we need
 
 ## Team Information
 
-- **Team members:** [Add names]
+- **Team members:** [Ashley Seward, Brandon Loi]
 - **Project theme:** AI as Camouflage
 - **Project title:** Crowd Behavior in a First-Person Shooter
 - **Individual contributions:** [Add what each person built, tested, wrote, or presented]
@@ -54,7 +54,7 @@ Doors, chairs, staring, talking, and formations can be added later if the main s
 
 ### 1. Basic Scene
 
-- [ ] Make a small test map.
+- [x] Make a small test map.
 - [ ] Add walkable locations or waypoints.
 - [ ] Add several NPCs to the scene.
 - [ ] Make sure NPCs can navigate around walls and objects.
