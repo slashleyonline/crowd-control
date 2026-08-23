@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_northsouth"]
+size = Vector3(42, 6, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_eastwest"]
+size = Vector3(1, 6, 42)
+
+[node name="Boundary" type="StaticBody3D"]
+
+[node name="North" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, -20)
+shape = SubResource("BoxShape3D_northsouth")
+
+[node name="South" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 20)
+shape = SubResource("BoxShape3D_northsouth")
+
+[node name="East" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 3.5, 0)
+shape = SubResource("BoxShape3D_eastwest")
+
+[node name="West" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 3.5, 0)
+shape = SubResource("BoxShape3D_eastwest")

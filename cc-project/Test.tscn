@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://powkftvbpbvt"]
 
 [ext_resource type="Script" uid="uid://dvcybdycmv1wc" path="res://crowdAgent.gd" id="1_myinc"]
+[ext_resource type="PackedScene" path="res://Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://Boundary.tscn" id="3_boundary"]
+[ext_resource type="Script" path="res://crowdSpawner.gd" id="4_spawner"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rvu7i"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -288,3 +291,11 @@ mesh = SubResource("CylinderMesh_2mnig")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=596827014]
 transform = Transform3D(1, 0, 0, 0, 0.7077299, 0.7064831, 0, -0.7064831, 0.7077299, 0, 10.558638, 18.530235)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 14)
+
+[node name="Boundary" parent="." instance=ExtResource("3_boundary")]
+
+[node name="CrowdSpawner" type="Node" parent="."]
+script = ExtResource("4_spawner")

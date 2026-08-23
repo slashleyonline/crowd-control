@@ -3,43 +3,124 @@ extends CharacterBody3D
 #with this, each state can handle its own update logic
 class IdleState:
 	func update(agent):
-		var new_velocity= Vector3.ZERO
+		#stand still and count the wait down. only when it runs out do we
+		#pick a new destination, so we ask for one path instead of one per frame.
+		agent.idle_timer -= agent.get_physics_process_delta_time()
 
-		agent.randomize_target_location()
+		if agent.idle_timer <= 0.0:
+			agent.randomize_target_location()
+			agent.state = agent.walking_state
 
-		if !agent.nav_agent.is_navigation_finished():
-			agent.state  = agent.walking_state
-
-		return new_velocity  
+		return Vector3.ZERO
 
 class WalkingState:
 	func update(agent):
-		var current_location = agent.global_transform.origin
-		var next_location = agent.nav_agent.get_next_path_position()
-		var new_velocity = (next_location  - current_location).normalized() * 10
-
 		if agent.nav_agent.is_navigation_finished():
-			agent.state = agent.idle_state
-			new_velocity = Vector3.ZERO
+			agent.start_idle()
+			return Vector3.ZERO
 
-		return new_velocity
+		#if we are barely moving we are probably jammed against someone.
+		#give up on this destination rather than pushing forever.
+		if agent.is_stuck():
+			agent.randomize_target_location()
+
+		var next_location = agent.nav_agent.get_next_path_position()
+		var direction = next_location - agent.global_position
+
+		#the path sits on the navmesh, which is below the agent's centre.
+		#flattening y stops that downward slope from stealing horizontal
+		#speed and from fighting the floor collision.
+		direction.y = 0
+
+		return direction.normalized() * agent.speed
 
 #starts in the idle state
 var idle_state = IdleState.new()
 var walking_state = WalkingState.new()
 var state=idle_state
 
-#higher than usual for testing purposes. should be 3.
-const SPEED = 10
+#every npc rolls its own speed and wait times in _ready so the crowd
+#does not walk like one organism. tune the ranges in the inspector.
+@export var min_speed = 2.5
+@export var max_speed = 4.0
+@export var min_idle_time = 0.5
+@export var max_idle_time = 3.0
+
+#how much room an npc tries to keep around itself. the body itself is
+#0.5 wide, so anything above that leaves a gap between people.
+@export var avoidance_radius = 0.7
+
+#how long an npc pushes against something before choosing a new destination
+@export var stuck_give_up_time = 2.0
+
+#this npc's own rolled values
+var speed = 3.0
+var idle_timer = 0.0
+
+#true while the player's gun is pointed at this npc. set by the player,
+#read by the fsm - a FrozenState can just check this in its update().
+var is_aimed_at = false
+
+#used by is_stuck() to notice when we have stopped making progress
+var stuck_timer = 0.0
+var last_position = Vector3.ZERO
+
+#avoidance only starts once the navigation map exists
+var navigation_ready = false
 
 @onready var nav_agent = $NavigationAgent3D
 
 func _ready():
-	#must be called twice due to the nature of NavigationServer3D.
-	#Source: https://github.com/godotengine/godot/issues/112652
-	await NavigationServer3D.map_changed
-	await NavigationServer3D.map_changed
+	#lets the player's aim raycast tell npcs apart from walls and floors
+	add_to_group("npc")
+
+	speed = randf_range(min_speed, max_speed)
+	last_position = global_position
+
+	#hold still until navigation is ready below, otherwise the idle state
+	#would ask for a path before the map exists
+	idle_timer = INF
+
+	await wait_for_navigation()
+
+	setup_avoidance()
+
+	#a random first wait staggers the crowd so they do not all set off
+	#on the same frame
+	idle_timer = randf_range(0.0, max_idle_time)
 	randomize_target_location()
+	navigation_ready = true
+
+
+#the navigation map is not usable on the very first frame, so we have to wait
+#before asking it for a path. we used to wait for NavigationServer3D.map_changed
+#(see https://github.com/godotengine/godot/issues/112652) but that only works
+#for pedestrians already in the scene: one spawned later finds the map already
+#built, so the signal never fires again and it would wait forever. checking the
+#map directly works for both.
+func wait_for_navigation():
+	while true:
+		var map = nav_agent.get_navigation_map()
+		if map.is_valid() and NavigationServer3D.map_get_regions(map).size() > 0:
+			#one more frame so the map has finished syncing before we use it
+			await get_tree().physics_frame
+			return
+		await get_tree().physics_frame
+
+
+#let the navigation server steer this npc around its neighbours.
+#done in code so the scene file does not need editing on every pedestrian.
+func setup_avoidance():
+	nav_agent.avoidance_enabled = true
+	nav_agent.radius = avoidance_radius
+	nav_agent.max_speed = speed
+
+	#only consider npcs that are actually close. the default is 50m, which
+	#is the whole map, so every agent would weigh every other agent.
+	nav_agent.neighbor_distance = 6.0
+	nav_agent.max_neighbors = 8
+
+	nav_agent.velocity_computed.connect(_on_velocity_computed)
 
 
 func update_target_location(target_location: Vector3):
@@ -49,13 +130,53 @@ func randomize_target_location():
 	var map = nav_agent.get_navigation_map()
 	update_target_location(NavigationServer3D.map_get_random_point(map, 1, true))
 
-func _process(delta: float) -> void:
+#called by the player when its aim ray enters or leaves this npc.
+#only called when the target changes, not every frame.
+func set_aimed_at(aimed: bool):
+	is_aimed_at = aimed
+
+#stand still for a random moment before walking somewhere new
+func start_idle():
+	idle_timer = randf_range(min_idle_time, max_idle_time)
+	state = idle_state
+
+#true once we have spent stuck_give_up_time hardly moving while walking
+func is_stuck() -> bool:
+	var moved = global_position.distance_to(last_position)
+	last_position = global_position
+
+	if moved < 0.02:
+		stuck_timer += get_physics_process_delta_time()
+	else:
+		stuck_timer = 0.0
+
+	if stuck_timer >= stuck_give_up_time:
+		stuck_timer = 0.0
+		return true
+	return false
+
+func _physics_process(_delta: float) -> void:
 
 	var new_velocity=state.update(self)
-	# we only need one line now
-	
+
+	#hand the velocity we want to the navigation server. it adjusts it to
+	#dodge nearby agents and hands it back through velocity_computed.
+	if navigation_ready:
+		nav_agent.set_velocity(new_velocity)
+	else:
+		apply_velocity(new_velocity)
+
+
+#the navigation server's answer: our velocity, adjusted to miss the neighbours
+func _on_velocity_computed(safe_velocity: Vector3):
+	apply_velocity(safe_velocity)
+
+
+func apply_velocity(new_velocity: Vector3):
+	#gravity builds up over time, so add to the fall speed we already
+	#have instead of replacing it with a fixed value
 	if !is_on_floor():
-		new_velocity.y -= 9.31
+		new_velocity.y = velocity.y + get_gravity().y * get_physics_process_delta_time()
 	velocity = new_velocity
-	
+
 	move_and_slide()
