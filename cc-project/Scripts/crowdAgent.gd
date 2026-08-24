@@ -7,9 +7,37 @@ class IdleState:
 		#pick a new destination, so we ask for one path instead of one per frame.
 		agent.idle_timer -= agent.get_physics_process_delta_time()
 
+		#occasionally look at the player if they walk nearby
+		if agent.try_start_stare():
+			return Vector3.ZERO
+
 		if agent.idle_timer <= 0.0:
 			agent.randomize_target_location()
 			agent.state = agent.walking_state
+
+		return Vector3.ZERO
+
+class StareState:
+	#stand still and turn the body toward the player, then go back to idle.
+	func update(agent):
+		agent.stare_timer -= agent.get_physics_process_delta_time()
+
+		var target = agent.stare_target
+		if target == null or not is_instance_valid(target):
+			agent.clear_head_look()
+			agent.start_idle()
+			return Vector3.ZERO
+
+		#stop staring if the player walked out of range
+		if agent.global_position.distance_to(target.global_position) > agent.stare_range:
+			agent.clear_head_look()
+			agent.start_idle()
+			return Vector3.ZERO
+
+		if agent.stare_timer <= 0.0:
+			agent.stare_target = null
+			agent.clear_head_look()
+			agent.start_idle()
 
 		return Vector3.ZERO
 
@@ -186,6 +214,7 @@ var frozen_state = FrozenState.new()
 var fleeing_state = FleeingState.new()
 var returning_state = ReturnState.new()
 var door_state = DoorState.new()
+var stare_state = StareState.new()
 var state=idle_state
 
 #constant value for the distance an NPC should have from the player while in the fleeing state.
@@ -212,12 +241,22 @@ var state=idle_state
 #how long after fleeing before an npc resumes normal idle/walk behavior
 @export var return_cooldown = 2.0
 
+#how close the player must be before an idle npc may stare
+@export var stare_range = 8.0
+#rough chance per second while idle and in range
+@export var stare_chance_per_second = 0.35
+#how long they keep looking
+@export var stare_duration_min = 1.5
+@export var stare_duration_max = 3.5
+
 #this npc's own rolled values
 var speed = 3.0
 var idle_timer = 0.0
 var fleeing_timer = 0.0
 var freeze_timer = 0.0
 var return_timer = 0.0
+var stare_timer = 0.0
+var stare_target = null
 
 #true while the player's gun is pointed at this npc. set by the player,
 #read by the fsm - a FrozenState can just check this in its update().
@@ -235,12 +274,20 @@ var _debug_last_state = null
 
 @onready var nav_agent = $NavigationAgent3D
 @onready var mesh = $PedBase
+@onready var skeleton = $PedBase/Armature/Skeleton3D
 @onready var interact_ray = $PedBase/InteractionRayCast
 @onready var label = $Label3D
+
+var neck_bone = -1
+var head_bone = -1
 
 func _ready():
 	#lets the player's aim raycast tell npcs apart from walls and floors
 	add_to_group("npc")
+
+	#bone indices kept so we can reset if a look pose ever gets stuck
+	neck_bone = skeleton.find_bone("Neck")
+	head_bone = skeleton.find_bone("Head")
 
 	speed = randf_range(min_speed, max_speed)
 	last_position = global_position
@@ -334,6 +381,7 @@ func start_idle():
 
 #lock up briefly when the player aims at this npc, then flee
 func start_frozen():
+	clear_head_look()
 	freeze_timer = freeze_duration
 	state = frozen_state
 
@@ -342,6 +390,45 @@ func start_returning():
 	return_timer = return_cooldown
 	randomize_target_location()
 	state = returning_state
+
+#roll whether an idle npc should look at the player this frame
+func try_start_stare() -> bool:
+	var player = get_tree().get_first_node_in_group("player")
+	if player == null:
+		return false
+	if global_position.distance_to(player.global_position) > stare_range:
+		return false
+
+	var chance = stare_chance_per_second * get_physics_process_delta_time()
+	if randf() > chance:
+		return false
+
+	start_stare(player)
+	return true
+
+func start_stare(target):
+	stare_target = target
+	stare_timer = randf_range(stare_duration_min, stare_duration_max)
+	state = stare_state
+
+#turn the whole body toward a world point (y rotation only)
+func face_toward(world_pos: Vector3):
+	var direction = world_pos - global_position
+	direction.y = 0
+	if direction.length_squared() < 0.0001:
+		return
+	mesh.rotation.y = rotate_toward(
+		mesh.rotation.y,
+		Vector2(-direction.x, direction.z).angle(),
+		get_physics_process_delta_time() * 5.0
+	)
+
+func clear_head_look():
+	#left over from the bone-look attempt; reset in case a pose got stuck
+	if neck_bone >= 0:
+		skeleton.reset_bone_pose(neck_bone)
+	if head_bone >= 0:
+		skeleton.reset_bone_pose(head_bone)
 
 #true once we have spent stuck_give_up_time hardly moving while walking
 func is_stuck() -> bool:
@@ -363,11 +450,17 @@ func fear_response(position, loudness):
 	#depending on the position andd radius, pedestrian must switch to a fear state.
 	#print(self.global_position.distance_to(position))
 	if self.global_position.distance_to(position) <= loudness:
+		clear_head_look()
 		fleeing_state.threat_position = position
 		fleeing_state.radius = loudness
 		flee_radius(position, loudness)
 		#print('heard!')
 		state = fleeing_state
+
+func _process(_delta: float) -> void:
+	#body turn while staring (smooth face toward player)
+	if state == stare_state and stare_target != null and is_instance_valid(stare_target):
+		face_toward(stare_target.global_position)
 
 func _physics_process(_delta: float) -> void:
 	#prints once per change so you can confirm Return in the Output panel
@@ -379,14 +472,16 @@ func _physics_process(_delta: float) -> void:
 
 	
 	var new_velocity=state.update(self)
-	
-	#rotate the model in the direction of movement.
+
+	var anim_player = mesh.get_node("AnimationPlayer")
+	#rotate the model in the direction of movement; stare handles its own facing.
 	if new_velocity != Vector3.ZERO and new_velocity != null:
-		mesh.rotation.y = rotate_toward(mesh.rotation.y, 
-		Vector2(-new_velocity.x, new_velocity.z).angle(), _delta * 5)
-		var anim_player = mesh.get_node("AnimationPlayer")
+		mesh.rotation.y = rotate_toward(mesh.rotation.y,
+			Vector2(-new_velocity.x, new_velocity.z).angle(), _delta * 5)
 		anim_player.play("Walk")
-	
+	elif state == stare_state or state == idle_state or state == frozen_state:
+		anim_player.play("Idle")
+
 	#hand the velocity we want to the navigation server. it adjusts it to
 	#dodge nearby agents and hands it back through velocity_computed.
 	if navigation_ready:
@@ -406,6 +501,10 @@ func _state_label(s) -> String:
 		return "Fleeing"
 	if s == returning_state:
 		return "Returning"
+	if s == stare_state:
+		return "Staring"
+	if s == door_state:
+		return "Door"
 	return "Unknown"
 
 

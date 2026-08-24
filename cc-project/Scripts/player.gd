@@ -19,6 +19,9 @@ var aim_target = null
 @onready var aim_ray = $Camera3D/RayCast3D
 
 func _ready():
+	#so npcs can find us for stare / reactions without a hard scene path
+	add_to_group("player")
+
 	spawn_position = global_position
 
 	#the ray starts inside our own capsule, so ignore ourselves
