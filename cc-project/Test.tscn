@@ -1,9 +1,8 @@
 [gd_scene format=3 uid="uid://powkftvbpbvt"]
 
 [ext_resource type="PackedScene" uid="uid://sf8l2cyjh4x" path="res://pedestrian.tscn" id="1_aq4fw"]
-[ext_resource type="Script" uid="uid://dvcybdycmv1wc" path="res://crowdAgent.gd" id="1_myinc"]
 [ext_resource type="PackedScene" path="res://Player.tscn" id="2_player"]
-[ext_resource type="PackedScene" path="res://Boundary.tscn" id="3_boundary"]
+[ext_resource type="PackedScene" uid="uid://dputl0ieurdkh" path="res://Boundary.tscn" id="3_boundary"]
 [ext_resource type="Script" uid="uid://dnl08x4d0fxrc" path="res://crowdSpawner.gd" id="4_spawner"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rvu7i"]
@@ -18,17 +17,17 @@ background_mode = 2
 sky = SubResource("Sky_myinc")
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_2mnig"]
-vertices = PackedVector3Array(5.5, 0.9609058, 19.5, 5.5, 0.9609058, 9.25, 4.25, 0.9609058, 9, -19.5, 0.9609058, 19.5, 4.25, 0.9609058, -9, 5.5, 0.9609058, -9.25, 5.5, 0.9609058, -19.5, -19.5, 0.9609058, -19.5, 6.75, 0.9609058, -9, 19.5, 0.9609058, -7.75, 19.5, 0.9609058, -19.5, 6.75, 0.9609058, -7.5, 6.75, 0.9609058, 7.5, 19.5, 0.9609058, 7.75, 6.75, 0.9609058, 9, 19.5, 0.9609058, 19.5)
-polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 3), PackedInt32Array(5, 4, 6), PackedInt32Array(6, 4, 7), PackedInt32Array(2, 3, 4), PackedInt32Array(4, 3, 7), PackedInt32Array(5, 6, 8), PackedInt32Array(8, 6, 10), PackedInt32Array(8, 10, 9), PackedInt32Array(9, 11, 8), PackedInt32Array(11, 9, 12), PackedInt32Array(12, 9, 13), PackedInt32Array(1, 14, 0), PackedInt32Array(0, 14, 15), PackedInt32Array(15, 14, 13), PackedInt32Array(14, 12, 13)]
+vertices = PackedVector3Array(4.25, 0.9609058, -9, 5.5, 0.9609058, -9.25, 5.5, 0.9609058, -59.5, -59.5, 0.9609058, -59.5, -59.5, 0.9609058, -7.75, 4.25, 0.9609058, -7.5, 6.75, 0.9609058, -9, 59.5, 0.9609058, -7.75, 59.5, 0.9609058, -59.5, 6.75, 0.9609058, -7.5, -59.5, 0.9609058, 7.75, 4.25, 0.9609058, 7.5, 6.75, 0.9609058, 7.5, 59.5, 0.9609058, 7.75, 5.5, 0.9609058, 59.5, 5.5, 0.9609058, 9.25, 4.25, 0.9609058, 9, -59.5, 0.9609058, 59.5, 6.75, 0.9609058, 9, 59.5, 0.9609058, 59.5)
+polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 3), PackedInt32Array(3, 0, 4), PackedInt32Array(0, 5, 4), PackedInt32Array(1, 2, 6), PackedInt32Array(6, 2, 8), PackedInt32Array(6, 8, 7), PackedInt32Array(7, 9, 6), PackedInt32Array(11, 10, 5), PackedInt32Array(5, 10, 4), PackedInt32Array(9, 7, 12), PackedInt32Array(12, 7, 13), PackedInt32Array(15, 14, 16), PackedInt32Array(16, 14, 17), PackedInt32Array(16, 17, 10), PackedInt32Array(10, 11, 16), PackedInt32Array(15, 18, 14), PackedInt32Array(14, 18, 19), PackedInt32Array(19, 18, 13), PackedInt32Array(18, 12, 13)]
 
 [sub_resource type="BoxMesh" id="BoxMesh_5glt3"]
-size = Vector3(40, 1, 40)
+size = Vector3(120, 1, 120)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2mnig"]
 albedo_color = Color(0.21960784, 1, 0.29411766, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_2mnig"]
-size = Vector3(40, 1, 40)
+size = Vector3(120, 1, 120)
 
 [sub_resource type="BoxMesh" id="BoxMesh_myinc"]
 size = Vector3(40, 1, 40)
@@ -38,10 +37,6 @@ albedo_color = Color(0.92156863, 0.39215687, 0.39215687, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_2au82"]
 size = Vector3(40, 1, 40)
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_5glt3"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_2mnig"]
 
 [node name="Node3D" type="Node3D" unique_id=860773960]
 
@@ -77,210 +72,6 @@ shape = SubResource("BoxShape3D_2au82")
 [node name="Pedestrian" parent="." unique_id=319213615 instance=ExtResource("1_aq4fw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 0)
 
-[node name="Pedestrian2" type="CharacterBody3D" parent="." unique_id=135513922]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, 0)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian2" unique_id=1695703035]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian2" unique_id=2129458044]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian2" unique_id=96442572]
-
-[node name="Pedestrian3" type="CharacterBody3D" parent="." unique_id=867371490]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, 0)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian3" unique_id=117864565]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian3" unique_id=945087569]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian3" unique_id=195670765]
-
-[node name="Pedestrian4" type="CharacterBody3D" parent="." unique_id=1329997304]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 7.4172554)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian4" unique_id=424120543]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian4" unique_id=821328418]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian4" unique_id=1470554826]
-
-[node name="Pedestrian5" type="CharacterBody3D" parent="." unique_id=676080355]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, 7.4172554)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian5" unique_id=1053873705]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian5" unique_id=1438615765]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian5" unique_id=675465668]
-
-[node name="Pedestrian6" type="CharacterBody3D" parent="." unique_id=739572007]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, 7.4172554)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian6" unique_id=1326196145]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian6" unique_id=448197032]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian6" unique_id=1906451109]
-
-[node name="Pedestrian7" type="CharacterBody3D" parent="." unique_id=1257142921]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 13.980213)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian7" unique_id=629413156]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian7" unique_id=525323385]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian7" unique_id=217582378]
-
-[node name="Pedestrian8" type="CharacterBody3D" parent="." unique_id=91944407]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, 13.980213)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian8" unique_id=359290197]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian8" unique_id=1130533475]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian8" unique_id=1500959766]
-
-[node name="Pedestrian9" type="CharacterBody3D" parent="." unique_id=1457173724]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, 13.980213)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian9" unique_id=1737190815]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian9" unique_id=239156107]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian9" unique_id=181407677]
-
-[node name="Pedestrian10" type="CharacterBody3D" parent="." unique_id=1774337275]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, -10.196762)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian10" unique_id=1854256243]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian10" unique_id=698509418]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian10" unique_id=510469605]
-
-[node name="Pedestrian11" type="CharacterBody3D" parent="." unique_id=629545046]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, -10.196762)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian11" unique_id=180363978]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian11" unique_id=332225821]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian11" unique_id=1206127017]
-
-[node name="Pedestrian12" type="CharacterBody3D" parent="." unique_id=1366204312]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, -10.196762)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian12" unique_id=984921088]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian12" unique_id=384521089]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian12" unique_id=911649239]
-
-[node name="Pedestrian13" type="CharacterBody3D" parent="." unique_id=836069958]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, -5.364109)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian13" unique_id=1504868919]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian13" unique_id=1589076338]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian13" unique_id=1731889610]
-
-[node name="Pedestrian14" type="CharacterBody3D" parent="." unique_id=96799561]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, -5.364109)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian14" unique_id=166318162]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian14" unique_id=2051605140]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian14" unique_id=879369219]
-
-[node name="Pedestrian15" type="CharacterBody3D" parent="." unique_id=713064677]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, -5.364109)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian15" unique_id=893041513]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian15" unique_id=151463900]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian15" unique_id=723450365]
-
-[node name="Pedestrian16" type="CharacterBody3D" parent="." unique_id=913912520]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 18.119421)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian16" unique_id=1219748672]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian16" unique_id=1720854508]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian16" unique_id=1537979277]
-
-[node name="Pedestrian17" type="CharacterBody3D" parent="." unique_id=185683089]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, 18.119421)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian17" unique_id=655438205]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian17" unique_id=322616478]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian17" unique_id=1118463500]
-
-[node name="Pedestrian18" type="CharacterBody3D" parent="." unique_id=226238984]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.151348, 1.9430935, 18.119421)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian18" unique_id=1418591296]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian18" unique_id=704360480]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian18" unique_id=2115948570]
-
 [node name="Camera3D" type="Camera3D" parent="." unique_id=596827014]
 transform = Transform3D(1, 0, 0, 0, 0.7077299, 0.7064831, 0, -0.7064831, 0.7077299, 0, 10.558638, 18.530235)
 
@@ -291,3 +82,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 14)
 
 [node name="CrowdSpawner" type="Node" parent="." unique_id=1611550150]
 script = ExtResource("4_spawner")
+crowd_size = 500

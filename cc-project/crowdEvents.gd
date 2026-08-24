@@ -12,7 +12,7 @@ signal gunshot(position: Vector3, loudness: float)
 signal explosion(position: Vector3, radius: float)
 
 #how far a gunshot carries by default. the map is 40x40 so this covers most of it.
-const GUNSHOT_LOUDNESS = 25.0
+const GUNSHOT_LOUDNESS = 50.0
 
 func report_gunshot(position: Vector3, loudness: float = GUNSHOT_LOUDNESS):
 	gunshot.emit(position, loudness)
