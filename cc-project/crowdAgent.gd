@@ -49,29 +49,44 @@ class FrozenState:
 
 class FleeingState:
 	#set position of event that  NPC is fleeing from. 
-	var position = null
+	var threat_position = null
+	var radius = null
+	
 	func update(agent):
-		if agent.nav_agent.is_navigation_finished():
+		agent.fleeing_timer -= agent.get_physics_process_delta_time()
+		
+		if threat_position == null:
+			threat_position = agent.global_position
+		if radius == null:
+			radius = 50
+
+		#vector pointing from the threat to npc
+		var away_vector = threat_position - agent.global_position
+		away_vector.y = 0
+		var distance = away_vector.length()
+
+		var is_safe = distance > radius
+		
+		if agent.nav_agent.is_navigation_finished() or agent.fleeing_timer <= 0.0:
+			agent.fleeing_timer = randf_range(agent.min_fleeing_time, agent.max_fleeing_time)
 			#reached a "safe" spot - cool down before normal crowd behavior
+			print('safe!')
 			agent.start_returning()
 			return Vector3.ZERO
-
+		
 		#if we are barely moving we are probably jammed against someone.
 		#give up on this destination rather than pushing forever.
 		if agent.is_stuck():
-			agent.randomize_target_location()
+			agent.state = agent.frozen_state
 
+		#vector pointing to the desired location
 		var next_location = agent.nav_agent.get_next_path_position()
-		var direction = next_location - agent.global_position
-
-		#if an event that is meant to scare the agent occurs, transition to the fear state.
-
-		#the path sits on the navmesh, which is below the agent's centre.
-		#flattening y stops that downward slope from stealing horizontal
-		#speed and from fighting the floor collision.
+		var direction = (next_location - agent.global_position).normalized()
 		direction.y = 0
-		var final_speed = agent.speed * 30000
-		return direction.normalized() * final_speed
+
+		var steer_direction = direction
+	
+		return steer_direction * agent.speed
 
 class ReturnState:
 	#after fleeing, wait out a short safety cooldown, then go back to idle.
@@ -111,6 +126,8 @@ var state=idle_state
 @export var max_speed = 4.0
 @export var min_idle_time = 0.5
 @export var max_idle_time = 3.0
+@export var min_fleeing_time = 45.0
+@export var max_fleeing_time = 75.0
 
 #how much room an npc tries to keep around itself. the body itself is
 #0.5 wide, so anything above that leaves a gap between people.
@@ -128,6 +145,7 @@ var state=idle_state
 #this npc's own rolled values
 var speed = 3.0
 var idle_timer = 0.0
+var fleeing_timer = 0.0
 var freeze_timer = 0.0
 var return_timer = 0.0
 
@@ -146,6 +164,7 @@ var navigation_ready = false
 var _debug_last_state = null
 
 @onready var nav_agent = $NavigationAgent3D
+@onready var label = $Label3D
 
 func _ready():
 	#lets the player's aim raycast tell npcs apart from walls and floors
@@ -165,6 +184,7 @@ func _ready():
 	#a random first wait staggers the crowd so they do not all set off
 	#on the same frame
 	idle_timer = randf_range(0.0, max_idle_time)
+	fleeing_timer = randf_range(min_fleeing_time, max_fleeing_time)
 	randomize_target_location()
 	navigation_ready = true
 
@@ -209,12 +229,23 @@ func randomize_target_location():
 
 func random_target_location_outside_radius(position, radius):
 	#given a position and radius, find an area on the map outside of it.
-	
-	var map = nav_agent.get_navigation_map()
 	var target_location = position
+	randomize_target_location()
 	
-	while (target_location.distance_to(position) >= radius):
-		update_target_location(NavigationServer3D.map_get_random_point(map, 1, true))
+	var attempts = 0
+	while (target_location.distance_to(position) <= radius and attempts < 30):
+		attempts += 1
+		randomize_target_location()
+
+func flee_radius(position, radius):
+	# Given a threat/reference position and radius, find a point on the map
+	# that is both outside the radius AND roughly in the opposite direction
+	# from the threat, relative to my current position.
+
+	var flee_direction = (global_position - position).normalized()
+
+	var target_location = position
+	update_target_location(global_position + flee_direction * (radius * 1.5))
 
 #called by the player when its aim ray enters or leaves this npc.
 #only called when the target changes, not every frame.
@@ -258,8 +289,12 @@ func is_stuck() -> bool:
 func fear_response(position, loudness):
 	#called when the CrowdEvent for explosions or gunshots fires a signal.
 	#depending on the position andd radius, pedestrian must switch to a fear state.
+	print(self.global_position.distance_to(position))
 	if self.global_position.distance_to(position) <= loudness:
-		random_target_location_outside_radius(position, loudness)
+		fleeing_state.threat_position = position
+		fleeing_state.radius = loudness
+		flee_radius(position, loudness)
+		print('heard!')
 		state = fleeing_state
 
 func _physics_process(_delta: float) -> void:
@@ -267,6 +302,7 @@ func _physics_process(_delta: float) -> void:
 	if state != _debug_last_state:
 		_debug_last_state = state
 		print(name, " -> ", _state_label(state))
+		label.text = _state_label(state)
 
 	var new_velocity=state.update(self)
 

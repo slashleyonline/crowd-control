@@ -56,23 +56,26 @@ func build_crowd():
 		#without this godot names them @CharacterBody3D@5 and so on, which
 		#is useless when we are printing who the player shot at
 		clone.name = "Pedestrian%d" % (i + 1)
-
+		clone.add_to_group('npc')
+		npcs.append(clone)
 		template.get_parent().add_child(clone)
-
+		
 		#drop them on a random spot on the navmesh so they start spread out.
 		#the 1.0 lifts them clear of the floor slab, same as the pedestrians
 		#already placed in the scene, so gravity settles them instead of
 		#starting them half buried in it.
 		clone.global_position = NavigationServer3D.map_get_random_point(map, 1, true) + Vector3(0, 1.0, 0)
+	attach_signals(npcs)
+
 
 	print("crowd size: ", crowd_size)
-	attach_signals(npcs)
 
 
 func attach_signals(npc_list):
 	#attach crowdEvents Signals to all predestrians.
 	
 	for npc in npc_list:
+		print('connected!')
 		CrowdEvents.connect("gunshot", npc.fear_response)
 		CrowdEvents.connect("explosion", npc.fear_response)
 	

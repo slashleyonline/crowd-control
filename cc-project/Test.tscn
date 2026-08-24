@@ -82,4 +82,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 14)
 
 [node name="CrowdSpawner" type="Node" parent="." unique_id=1611550150]
 script = ExtResource("4_spawner")
-crowd_size = 500
+crowd_size = 200
