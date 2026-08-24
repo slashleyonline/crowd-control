@@ -35,7 +35,7 @@ blend_shape_mode = 0
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_rmxdl"]
 
-[node name="Pedestrian" type="CharacterBody3D" unique_id=319213615]
+[node name="Pedestrian" type="CharacterBody3D" unique_id=319213615 groups=["NPC"]]
 script = ExtResource("1_epmes")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=88462388]
@@ -44,10 +44,18 @@ shape = SubResource("CylinderShape3D_5glt3")
 [node name="PedBase" parent="." unique_id=181494089 instance=ExtResource("2_epmes")]
 transform = Transform3D(-1.3113417e-08, 0, -0.3, 0, 0.3, 0, 0.3, 0, -1.3113417e-08, 0, -0.2, 0)
 
-[node name="Eyes" parent="PedBase/Armature/Skeleton3D" parent_id_path=PackedInt32Array(181494089, 1893232422) index="1" unique_id=876665287]
+[node name="Skeleton3D" parent="PedBase/Armature" parent_id_path=PackedInt32Array(181494089, 1729788266) index="4" unique_id=1893232422]
+bones/2/rotation = Quaternion(-0.2288474, -0.021608826, 0.016853377, 0.9730765)
+bones/3/rotation = Quaternion(-0.019619694, 0.00011870096, -0.052966766, 0.99840355)
+bones/4/rotation = Quaternion(0.44285983, -0.18072043, 0.53540224, 0.69610333)
+bones/6/rotation = Quaternion(-0.24122268, -0.013698867, -0.05501879, 0.9688121)
+bones/7/rotation = Quaternion(0.0009784643, 3.2988673e-06, 0.1097666, 0.9939569)
+bones/8/rotation = Quaternion(-0.0015433314, -2.3915874e-07, -0.71846706, 0.6955593)
+
+[node name="Eyes" parent="PedBase/Armature/Skeleton3D" index="1" unique_id=876665287]
 mesh = null
 
-[node name="Mouth" parent="PedBase/Armature/Skeleton3D" parent_id_path=PackedInt32Array(181494089, 1893232422) index="2" unique_id=1135133202]
+[node name="Mouth" parent="PedBase/Armature/Skeleton3D" index="2" unique_id=1135133202]
 mesh = SubResource("ArrayMesh_cl0mi")
 
 [node name="InteractionRayCast" type="RayCast3D" parent="PedBase" unique_id=87017908]

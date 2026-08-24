@@ -105,7 +105,7 @@ func attach_signals(npc_list):
 	pass
 
 func modify_meshes(npc_list):
-	
+	#modify the npc models to demonstrate variety
 	for npc in npc_list:
 		var skeleton3d = npc.get_node("PedBase/Armature/Skeleton3D")
 		#randomize skin color
@@ -160,9 +160,7 @@ func modify_meshes(npc_list):
 		mat = StandardMaterial3D.new()
 		mat.albedo_color = Color(randf_range(0,1), randf_range(0,1), randf_range(0,1))
 		hair.set_surface_override_material(0, mat)
-		
-		#randomize
-
+	
 func _process(delta):
 	if not show_fps:
 		return

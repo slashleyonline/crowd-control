@@ -422,7 +422,7 @@ size = Vector3(9, 1, 8)
 transform = Transform3D(-0.7071068, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071068, -35.922726, 5, -9.525126)
 shape = SubResource("ConcavePolygonShape3D_hqie5")
 
-[node name="Pedestrian" type="CharacterBody3D" parent="." unique_id=319213615]
+[node name="Pedestrian" type="CharacterBody3D" parent="." unique_id=319213615 groups=["NPC"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, -1.9255452)
 script = ExtResource("4_estwp")
 
