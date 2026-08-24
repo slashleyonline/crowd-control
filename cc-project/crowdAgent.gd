@@ -52,7 +52,8 @@ class FleeingState:
 	var position = null
 	func update(agent):
 		if agent.nav_agent.is_navigation_finished():
-			agent.start_idle()
+			#reached a "safe" spot - cool down before normal crowd behavior
+			agent.start_returning()
 			return Vector3.ZERO
 
 		#if we are barely moving we are probably jammed against someone.
@@ -70,17 +71,36 @@ class FleeingState:
 		#speed and from fighting the floor collision.
 		direction.y = 0
 		var final_speed = agent.speed * 30000
-		print(final_speed)
 		return direction.normalized() * final_speed
 
 class ReturnState:
-	pass
+	#after fleeing, wait out a short safety cooldown, then go back to idle.
+	#walk calmly so the crowd does not all freeze in place after a scare.
+	func update(agent):
+		agent.return_timer -= agent.get_physics_process_delta_time()
+
+		if agent.return_timer <= 0.0:
+			agent.start_idle()
+			return Vector3.ZERO
+
+		if agent.nav_agent.is_navigation_finished():
+			agent.randomize_target_location()
+			return Vector3.ZERO
+
+		if agent.is_stuck():
+			agent.randomize_target_location()
+
+		var next_location = agent.nav_agent.get_next_path_position()
+		var direction = next_location - agent.global_position
+		direction.y = 0
+		return direction.normalized() * agent.speed
+
 #starts in the idle state
 var idle_state = IdleState.new()
 var walking_state = WalkingState.new()
 var frozen_state = FrozenState.new()
 var fleeing_state = FleeingState.new()
-var returning_state
+var returning_state = ReturnState.new()
 var state=idle_state
 
 #constant value for the distance an NPC should have from the player while in the fleeing state.
@@ -102,10 +122,14 @@ var state=idle_state
 #how long an aimed-at npc freezes before switching to fleeing
 @export var freeze_duration = 0.8
 
+#how long after fleeing before an npc resumes normal idle/walk behavior
+@export var return_cooldown = 2.0
+
 #this npc's own rolled values
 var speed = 3.0
 var idle_timer = 0.0
 var freeze_timer = 0.0
+var return_timer = 0.0
 
 #true while the player's gun is pointed at this npc. set by the player,
 #read by the fsm - a FrozenState can just check this in its update().
@@ -117,6 +141,9 @@ var last_position = Vector3.ZERO
 
 #avoidance only starts once the navigation map exists
 var navigation_ready = false
+
+#used only so we can print when the fsm changes (see Output in Godot)
+var _debug_last_state = null
 
 @onready var nav_agent = $NavigationAgent3D
 
@@ -207,6 +234,12 @@ func start_frozen():
 	freeze_timer = freeze_duration
 	state = frozen_state
 
+#cool down after fleeing before rejoining normal crowd movement
+func start_returning():
+	return_timer = return_cooldown
+	randomize_target_location()
+	state = returning_state
+
 #true once we have spent stuck_give_up_time hardly moving while walking
 func is_stuck() -> bool:
 	var moved = global_position.distance_to(last_position)
@@ -230,6 +263,10 @@ func fear_response(position, loudness):
 		state = fleeing_state
 
 func _physics_process(_delta: float) -> void:
+	#prints once per change so you can confirm Return in the Output panel
+	if state != _debug_last_state:
+		_debug_last_state = state
+		print(name, " -> ", _state_label(state))
 
 	var new_velocity=state.update(self)
 
@@ -239,6 +276,20 @@ func _physics_process(_delta: float) -> void:
 		nav_agent.set_velocity(new_velocity)
 	else:
 		apply_velocity(new_velocity)
+
+
+func _state_label(s) -> String:
+	if s == idle_state:
+		return "Idle"
+	if s == walking_state:
+		return "Walking"
+	if s == frozen_state:
+		return "Frozen"
+	if s == fleeing_state:
+		return "Fleeing"
+	if s == returning_state:
+		return "Returning"
+	return "Unknown"
 
 
 #the navigation server's answer: our velocity, adjusted to miss the neighbours
