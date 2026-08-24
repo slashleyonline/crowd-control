@@ -83,7 +83,8 @@ func update_aim():
 	if aim_ray.is_colliding():
 		var collider = aim_ray.get_collider()
 		#the ray also hits walls and the floor, so check it is actually an npc
-		if collider != null and collider.is_in_group("npc"):
+		if collider != null and collider.is_in_group("npc") and \
+		Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 			hit = collider
 
 	#only tell npcs when the target actually changes. sweeping the mouse

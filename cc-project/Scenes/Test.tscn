@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://powkftvbpbvt"]
 
-[ext_resource type="PackedScene" uid="uid://sf8l2cyjh4x" path="res://pedestrian.tscn" id="1_aq4fw"]
-[ext_resource type="PackedScene" path="res://Player.tscn" id="2_player"]
-[ext_resource type="PackedScene" uid="uid://dputl0ieurdkh" path="res://Boundary.tscn" id="3_boundary"]
+[ext_resource type="PackedScene" uid="uid://sf8l2cyjh4x" path="res://Scenes/pedestrian.tscn" id="1_aq4fw"]
+[ext_resource type="PackedScene" path="res://Scenes/Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://dputl0ieurdkh" path="res://Scenes/Boundary.tscn" id="3_boundary"]
 [ext_resource type="Script" uid="uid://dnl08x4d0fxrc" path="res://crowdSpawner.gd" id="4_spawner"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rvu7i"]
