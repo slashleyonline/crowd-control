@@ -10,6 +10,30 @@ extends Node
 
 var report_timer = 0.0
 
+#loading textures and models
+@export var dict_eye = { 
+	"Angry" : preload("res://Textures/Face/Eyes/Angry.png"),
+	"Arched" : preload("res://Textures/Face/Eyes/Arched.png"),
+	"Groggy" : preload("res://Textures/Face/Eyes/Groggy.png"),
+	"Round" : preload("res://Textures/Face/Eyes/Round.png")}
+
+@export var dict_mouth = {
+	"Cat" : preload("res://Textures/Face/Mouth/Cat.png"),
+	"Frown" : preload("res://Textures/Face/Mouth/Frown.png"),
+	"Grin" : preload("res://Textures/Face/Mouth/Grin.png"),
+	"Neutral" : preload("res://Textures/Face/Mouth/Neutral.png"),
+	"Toothy Smile" : preload("res://Textures/Face/Mouth/Toothy Smile.png"),
+	"V" : preload("res://Textures/Face/Mouth/V.png")
+}
+
+@export var dict_hair = {
+	"Bald" : preload("res://Models/Player/Cosmetic/Hair/Bald.tres"),
+	"Combover" : preload("res://Models/Player/Cosmetic/Hair/Combover.tres"),
+	"Curly" : preload("res://Models/Player/Cosmetic/Hair/Curly.tres"),
+	"FlatTop" : preload("res://Models/Player/Cosmetic/Hair/FlatTop.tres"),
+	"Long" : preload("res://Models/Player/Cosmetic/Hair/Long.tres"),
+}
+
 func _ready():
 	#lets us benchmark without touching the scene: godot ... -- --crowd=50
 	for arg in OS.get_cmdline_user_args():
@@ -66,7 +90,7 @@ func build_crowd():
 		#starting them half buried in it.
 		clone.global_position = NavigationServer3D.map_get_random_point(map, 1, true) + Vector3(0, 1.0, 0)
 	attach_signals(npcs)
-
+	modify_meshes(npcs)
 
 	print("crowd size: ", crowd_size)
 
@@ -79,6 +103,58 @@ func attach_signals(npc_list):
 		CrowdEvents.connect("explosion", npc.fear_response)
 	
 	pass
+
+func modify_meshes(npc_list):
+	
+	for npc in npc_list:
+		var skeleton3d = npc.get_node("PedBase/Armature/Skeleton3D")
+		#randomize skin color
+		var body = skeleton3d.get_node("Body")
+		
+		var skin = StandardMaterial3D.new()
+		skin.albedo_color = Color(randf_range(0,1), randf_range(0,1), randf_range(0,1))
+		
+		body.set_surface_override_material(0, skin)
+		
+		#randomize facial features
+		
+		#eyes
+		var eyes = skeleton3d.get_node("Eyes")
+		var size = dict_eye.size()
+		var idx = randi() % size
+		print(idx)
+		var random_eye = dict_eye.keys()[idx]
+		
+		var eye_texture = dict_eye[random_eye]
+
+		eyes.mesh = eyes.mesh.duplicate(true)
+		var mat = eyes.get_active_material(0)
+		print(mat)
+		print('selected texture: ', eye_texture)
+		mat.albedo_texture = eye_texture
+		print(mat.albedo_texture)
+		
+		#mouth
+		var mouth = skeleton3d.get_node("Mouth")
+		size = dict_mouth.size()
+		idx = randi() % size
+		print(idx)
+		var random_mouth = dict_mouth.keys()[idx]
+		
+		var mouth_texture = dict_mouth[random_mouth]
+
+		mouth.mesh = mouth.mesh.duplicate(true)
+		mat = mouth.get_active_material(0)
+		print(mat)
+		print('selected texture: ', eye_texture)
+		mat.albedo_texture = mouth_texture
+		print(mat.albedo_texture)
+		
+		#randomize hair
+		
+		
+		
+		#randomize
 
 func _process(delta):
 	if not show_fps:

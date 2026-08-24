@@ -234,8 +234,8 @@ var navigation_ready = false
 var _debug_last_state = null
 
 @onready var nav_agent = $NavigationAgent3D
-@onready var mesh = $MeshInstance3D
-@onready var interact_ray = $MeshInstance3D/InteractionRayCast
+@onready var mesh = $PedBase
+@onready var interact_ray = $PedBase/InteractionRayCast
 @onready var label = $Label3D
 
 func _ready():
@@ -383,7 +383,9 @@ func _physics_process(_delta: float) -> void:
 	#rotate the model in the direction of movement.
 	if new_velocity != Vector3.ZERO and new_velocity != null:
 		mesh.rotation.y = rotate_toward(mesh.rotation.y, 
-		Vector2(new_velocity.x, -new_velocity.z).angle(), _delta)
+		Vector2(-new_velocity.x, new_velocity.z).angle(), _delta * 5)
+		var anim_player = mesh.get_node("AnimationPlayer")
+		anim_player.play("Walk")
 	
 	#hand the velocity we want to the navigation server. it adjusts it to
 	#dodge nearby agents and hands it back through velocity_computed.

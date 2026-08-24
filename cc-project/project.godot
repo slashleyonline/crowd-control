@@ -17,7 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-CrowdEvents="*res://crowdEvents.gd"
+CrowdEvents="*res://Scripts/crowdEvents.gd"
 
 [display]
 

@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://powkftvbpbvt"]
 
 [ext_resource type="PackedScene" uid="uid://sf8l2cyjh4x" path="res://Scenes/pedestrian.tscn" id="1_aq4fw"]
-[ext_resource type="PackedScene" path="res://Scenes/Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://csyet3k6vb4mr" path="res://Scenes/Player.tscn" id="2_player"]
 [ext_resource type="PackedScene" uid="uid://dputl0ieurdkh" path="res://Scenes/Boundary.tscn" id="3_boundary"]
-[ext_resource type="Script" uid="uid://dnl08x4d0fxrc" path="res://crowdSpawner.gd" id="4_spawner"]
+[ext_resource type="Script" uid="uid://dnl08x4d0fxrc" path="res://Scripts/crowdSpawner.gd" id="4_spawner"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rvu7i"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
