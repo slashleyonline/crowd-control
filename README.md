@@ -56,7 +56,7 @@ Doors, chairs, staring, talking, and formations can be added later if the main s
 
 - [x] Make a small test map.
 - [ ] Add walkable locations or waypoints.
-- [ ] Add several NPCs to the scene.
+- [x] Add several NPCs to the scene.
 - [x] Make sure NPCs can navigate around walls and objects.
 
 ### 2. Basic NPC Movement
@@ -71,25 +71,25 @@ Doors, chairs, staring, talking, and formations can be added later if the main s
 
 - [x] Create the Idle state.
 - [x] Create the Walking state.
-- [ ] Create the Frozen state.
-- [ ] Create the Fleeing state.
-- [ ] Create the Returning state.
-- [ ] Show the current state in the debug output.
+- [x] Create the Frozen state.
+- [x] Create the Fleeing state.
+- [x] Create the Returning state.
+- [x] Show the current state in the debug output.
 
 ### 4. Danger Reactions
 
 - [x] Create a gunfire event.
 - [x] Create an explosion event with a position and radius.
-- [ ] Notify nearby NPCs instead of making every NPC search every frame.
-- [ ] Make NPCs choose a destination away from the danger.
-- [ ] Make a targeted NPC freeze briefly before fleeing.
-- [ ] Add a cooldown before NPCs return to normal.
+- [x] Notify nearby NPCs instead of making every NPC search every frame.
+- [x] Make NPCs choose a destination away from the danger.
+- [x] Make a targeted NPC freeze briefly before fleeing.
+- [x] Add a cooldown before NPCs return to normal.
 
 ### 5. Performance and Testing
 
-- [ ] Test with 10 NPCs.
-- [ ] Test with 25 NPCs.
-- [ ] Test with 50 or more NPCs if possible.
+- [x] Test with 10 NPCs.
+- [x] Test with 25 NPCs.
+- [x] Test with 50 or more NPCs if possible.
 - [ ] Stagger AI updates so all NPCs do not think on the same frame.
 - [ ] Lower the decision update rate if performance becomes bad.
 - [ ] Record the highest NPC count that still runs smoothly.
