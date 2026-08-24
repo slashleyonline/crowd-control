@@ -421,3 +421,17 @@ crowd_size = 200
 
 [node name="Door" parent="." unique_id=541325732 instance=ExtResource("8_alba5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.04465604, 0.477579, 7.2427692)
+
+[node name="Door4" parent="." unique_id=107699591 instance=ExtResource("8_alba5")]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, 23.51528, 0.47757804, 28.955631)
+
+[node name="Door2" parent="." unique_id=1399883545 instance=ExtResource("8_alba5")]
+transform = Transform3D(-0.25881904, 0, 0.9659258, 0, 1, 0, -0.9659258, 0, -0.25881904, -28.044657, 0.477579, 28.24277)
+
+[node name="Door3" parent="." unique_id=274558027 instance=ExtResource("8_alba5")]
+transform = Transform3D(0.70710695, 0, 0.7071068, 0, 1, 0, -0.7071068, 0, 0.70710695, -33.16565, 0.477579, -6.8313136)
+
+[editable path="Door"]
+[editable path="Door4"]
+[editable path="Door2"]
+[editable path="Door3"]

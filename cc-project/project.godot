@@ -27,6 +27,7 @@ window/stretch/aspect="expand"
 [global_group]
 
 Interactable=""
+Door=""
 
 [input]
 

@@ -16,7 +16,9 @@ shape = SubResource("CylinderShape3D_5glt3")
 mesh = SubResource("CylinderMesh_2mnig")
 
 [node name="InteractionRayCast" type="RayCast3D" parent="MeshInstance3D" unique_id=1638891180]
-target_position = Vector3(2, 0, 0)
+target_position = Vector3(3, 0, 0)
+debug_shape_custom_color = Color(1, 0.23745415, 0.5664999, 1)
+debug_shape_thickness = 5
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=2019590041]
 

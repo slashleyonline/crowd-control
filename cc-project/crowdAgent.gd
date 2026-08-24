@@ -32,6 +32,9 @@ class WalkingState:
 		#speed and from fighting the floor collision.
 		direction.y = 0
 
+		#check if the pedestrian needs to open a door
+		agent.check_door_interact()
+
 		return direction.normalized() * agent.speed 
 
 class FrozenState:
@@ -85,7 +88,10 @@ class FleeingState:
 		direction.y = 0
 
 		var steer_direction = direction
-	
+
+		#check if the pedestrian needs to open a door
+		agent.check_door_interact()
+
 		return steer_direction * agent.speed
 
 class ReturnState:
@@ -108,7 +114,70 @@ class ReturnState:
 		var next_location = agent.nav_agent.get_next_path_position()
 		var direction = next_location - agent.global_position
 		direction.y = 0
+
+		#check if the pedestrian needs to open a door
+		agent.check_door_interact()
+
 		return direction.normalized() * agent.speed
+
+class DoorState:
+	#previous target location. needs to be set before moving to this state.
+	var prev_target = null
+	#previous state.
+	var prev_state = null
+	#door that is being opened.
+	var door_body = null
+	#opening position that the npc moves to
+	var open_pos = null
+	
+	var move_to_pos_state = MoveToPosState.new()
+	var open_door_state = OpenDoorState.new()
+	
+	var current_door_state = move_to_pos_state
+	
+	func update(agent):
+		return current_door_state.update(agent)
+	
+	#move to the nearest opening position
+	class MoveToPosState:
+		func update(agent):
+			if agent.nav_agent.is_navigation_finished():
+				agent.door_state.current_door_state = agent.door_state.open_door_state
+				return Vector3.ZERO
+			if agent.nav_agent.is_navigation_finished():
+				agent.start_idle()
+				return Vector3.ZERO
+
+			#if we are barely moving we are probably jammed against someone.
+			#give up on this destination rather than pushing forever.
+			if agent.is_stuck():
+				agent.randomize_target_location()
+
+			var next_location = agent.nav_agent.get_next_path_position()
+			var direction = next_location - agent.global_position
+
+				#the path sits on the navmesh, which is below the agent's centre.
+				#flattening y stops that downward slope from stealing horizontal
+				#speed and from fighting the floor collision.
+			direction.y = 0
+
+			return direction.normalized() * agent.speed 
+	#if the door is closed, open it. wait 1.5 seconds.
+	class OpenDoorState:
+		const waitTime = 1.5
+		var time = 0
+		func update(agent):
+			var door_body = agent.door_state.door_body
+			if !door_body.opened:
+				door_body.interact(agent)
+			
+			time += agent.get_physics_process_delta_time()
+			if time >= waitTime:
+				agent.update_target_location(agent.door_state.prev_target)
+				agent.state = agent.door_state.prev_state
+			
+			return Vector3.ZERO
+			
 
 #starts in the idle state
 var idle_state = IdleState.new()
@@ -116,6 +185,7 @@ var walking_state = WalkingState.new()
 var frozen_state = FrozenState.new()
 var fleeing_state = FleeingState.new()
 var returning_state = ReturnState.new()
+var door_state = DoorState.new()
 var state=idle_state
 
 #constant value for the distance an NPC should have from the player while in the fleeing state.
@@ -164,7 +234,8 @@ var navigation_ready = false
 var _debug_last_state = null
 
 @onready var nav_agent = $NavigationAgent3D
-
+@onready var mesh = $MeshInstance3D
+@onready var interact_ray = $MeshInstance3D/InteractionRayCast
 @onready var label = $Label3D
 
 func _ready():
@@ -305,9 +376,15 @@ func _physics_process(_delta: float) -> void:
 		#print(name, " -> ", _state_label(state))
 		label.text = _state_label(state)
 	
-	#rotate the model in the direction of movement.
+
 	
 	var new_velocity=state.update(self)
+	
+	#rotate the model in the direction of movement.
+	if new_velocity != Vector3.ZERO and new_velocity != null:
+		mesh.rotation.y = rotate_toward(mesh.rotation.y, 
+		Vector2(new_velocity.x, -new_velocity.z).angle(), _delta)
+	
 	#hand the velocity we want to the navigation server. it adjusts it to
 	#dodge nearby agents and hands it back through velocity_computed.
 	if navigation_ready:
@@ -334,6 +411,20 @@ func _state_label(s) -> String:
 func _on_velocity_computed(safe_velocity: Vector3):
 	apply_velocity(safe_velocity)
 
+func check_door_interact():
+	if interact_ray.is_colliding():
+		var collider = interact_ray.get_collider()
+		#the ray also hits walls and the floor, so check it is actually an npc
+		if collider != null and collider.is_in_group("Interactable") and \
+		collider.is_in_group("Door"):
+			door_state.prev_target = nav_agent.target_position
+			door_state.prev_state = state
+			door_state.door_body = collider
+			door_state.open_pos = collider.get_open_pos(global_position)
+			
+			update_target_location(door_state.open_pos)
+			
+			state = door_state
 
 func apply_velocity(new_velocity: Vector3):
 	#gravity builds up over time, so add to the fall speed we already

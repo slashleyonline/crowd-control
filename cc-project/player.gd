@@ -88,7 +88,7 @@ func update_aim():
 			hit = collider
 		elif collider != null and collider.is_in_group("Interactable") and \
 		Input.is_action_just_pressed("Use"):
-			collider.interact()
+			collider.interact(self)
 
 	#only tell npcs when the target actually changes. sweeping the mouse
 	#across a crowd is then two calls per frame at most, however big it is.
