@@ -122,14 +122,12 @@ func modify_meshes(npc_list):
 		var eyes = skeleton3d.get_node("Eyes")
 		var size = dict_eye.size()
 		var idx = randi() % size
-		print(idx)
 		var random_eye = dict_eye.keys()[idx]
 		
 		var eye_texture = dict_eye[random_eye]
 
 		eyes.mesh = eyes.mesh.duplicate(true)
 		var mat = eyes.get_active_material(0)
-		print(mat)
 		print('selected texture: ', eye_texture)
 		mat.albedo_texture = eye_texture
 		print(mat.albedo_texture)
@@ -138,21 +136,30 @@ func modify_meshes(npc_list):
 		var mouth = skeleton3d.get_node("Mouth")
 		size = dict_mouth.size()
 		idx = randi() % size
-		print(idx)
 		var random_mouth = dict_mouth.keys()[idx]
 		
 		var mouth_texture = dict_mouth[random_mouth]
 
 		mouth.mesh = mouth.mesh.duplicate(true)
 		mat = mouth.get_active_material(0)
-		print(mat)
 		print('selected texture: ', eye_texture)
 		mat.albedo_texture = mouth_texture
 		print(mat.albedo_texture)
 		
 		#randomize hair
+		size = dict_hair.size()
+		idx = randi() % size
+		var random_hair = dict_hair.keys()[idx]
+		print(random_hair)
 		
-		
+		var hair_mesh = dict_hair[random_hair]
+		var hair = MeshInstance3D.new()
+		hair.mesh = hair_mesh
+		skeleton3d.add_child(hair)
+
+		mat = StandardMaterial3D.new()
+		mat.albedo_color = Color(randf_range(0,1), randf_range(0,1), randf_range(0,1))
+		hair.set_surface_override_material(0, mat)
 		
 		#randomize
 

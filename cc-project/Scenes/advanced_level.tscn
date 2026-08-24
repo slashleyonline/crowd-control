@@ -9,6 +9,11 @@
 [ext_resource type="PackedScene" uid="uid://dputl0ieurdkh" path="res://Scenes/Boundary.tscn" id="6_ti7xu"]
 [ext_resource type="Script" uid="uid://dnl08x4d0fxrc" path="res://Scripts/crowdSpawner.gd" id="7_hqie5"]
 [ext_resource type="PackedScene" uid="uid://dasedskqnytc1" path="res://Scenes/door.tscn" id="8_alba5"]
+[ext_resource type="ArrayMesh" uid="uid://c7a7mef0ytbqi" path="res://Models/Player/Cosmetic/Hair/Bald.tres" id="9_pagjx"]
+[ext_resource type="ArrayMesh" uid="uid://cjcwn6ppjdir3" path="res://Models/Player/Cosmetic/Hair/Combover.tres" id="10_t5y7c"]
+[ext_resource type="ArrayMesh" uid="uid://dea3slaw3tsm" path="res://Models/Player/Cosmetic/Hair/Curly.tres" id="11_a73le"]
+[ext_resource type="ArrayMesh" uid="uid://b3h50r8bvn2n5" path="res://Models/Player/Cosmetic/Hair/FlatTop.tres" id="12_32bap"]
+[ext_resource type="ArrayMesh" uid="uid://du7nl7mwc3cyu" path="res://Models/Player/Cosmetic/Hair/Long.tres" id="13_lo1h7"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rvu7i"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -456,6 +461,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 14)
 [node name="CrowdSpawner" type="Node" parent="." unique_id=1611550150]
 script = ExtResource("7_hqie5")
 crowd_size = 200
+dict_hair = {
+"Bald": ExtResource("9_pagjx"),
+"Combover": ExtResource("10_t5y7c"),
+"Curly": ExtResource("11_a73le"),
+"FlatTop": ExtResource("12_32bap"),
+"Long": ExtResource("13_lo1h7")
+}
 
 [node name="Door" parent="." unique_id=541325732 instance=ExtResource("8_alba5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.04465604, 0.477579, 7.2427692)
