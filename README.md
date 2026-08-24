@@ -62,10 +62,10 @@ Doors, chairs, staring, talking, and formations can be added later if the main s
 ### 2. Basic NPC Movement
 
 - [x] Give each NPC a random destination.
-- [ ] Make the NPC wait after reaching a destination.
-- [ ] Choose a new destination after waiting.
-- [ ] Keep NPCs from walking into each other as much as possible.
-- [ ] Add small random differences in speed and wait time.
+- [x] Make the NPC wait after reaching a destination.
+- [x] Choose a new destination after waiting.
+- [x] Keep NPCs from walking into each other as much as possible.
+- [x] Add small random differences in speed and wait time.
 
 ### 3. Finite State Machine
 
@@ -78,8 +78,8 @@ Doors, chairs, staring, talking, and formations can be added later if the main s
 
 ### 4. Danger Reactions
 
-- [ ] Create a gunfire event.
-- [ ] Create an explosion event with a position and radius.
+- [x] Create a gunfire event.
+- [x] Create an explosion event with a position and radius.
 - [ ] Notify nearby NPCs instead of making every NPC search every frame.
 - [ ] Make NPCs choose a destination away from the danger.
 - [ ] Make a targeted NPC freeze briefly before fleeing.

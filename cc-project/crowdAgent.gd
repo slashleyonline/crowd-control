@@ -27,6 +27,8 @@ class WalkingState:
 		var next_location = agent.nav_agent.get_next_path_position()
 		var direction = next_location - agent.global_position
 
+		#if an event that is meant to scare the agent occurs, transition to the fear state.
+
 		#the path sits on the navmesh, which is below the agent's centre.
 		#flattening y stops that downward slope from stealing horizontal
 		#speed and from fighting the floor collision.
@@ -34,9 +36,20 @@ class WalkingState:
 
 		return direction.normalized() * agent.speed
 
+class FrozenState:
+	pass
+
+class FleeingState:
+	pass
+
+class ReturnState:
+	pass
 #starts in the idle state
 var idle_state = IdleState.new()
 var walking_state = WalkingState.new()
+var frozen_state = FrozenState.new()
+var fleeing_state
+var returning_state
 var state=idle_state
 
 #every npc rolls its own speed and wait times in _ready so the crowd
@@ -154,6 +167,13 @@ func is_stuck() -> bool:
 		stuck_timer = 0.0
 		return true
 	return false
+
+func fear_response(position, loudness):
+	#called when the CrowdEvent for explosions or gunshots fires a signal.
+	#depending on the position andd radius, pedestrian must switch to a fear state.
+	if self.global_position.distance_to(position) <= loudness:
+		print('within range!: ', self.name)
+	pass
 
 func _physics_process(_delta: float) -> void:
 

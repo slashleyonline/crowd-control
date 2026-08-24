@@ -1,9 +1,10 @@
 [gd_scene format=3 uid="uid://powkftvbpbvt"]
 
+[ext_resource type="PackedScene" uid="uid://sf8l2cyjh4x" path="res://pedestrian.tscn" id="1_aq4fw"]
 [ext_resource type="Script" uid="uid://dvcybdycmv1wc" path="res://crowdAgent.gd" id="1_myinc"]
 [ext_resource type="PackedScene" path="res://Player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://Boundary.tscn" id="3_boundary"]
-[ext_resource type="Script" path="res://crowdSpawner.gd" id="4_spawner"]
+[ext_resource type="Script" uid="uid://dnl08x4d0fxrc" path="res://crowdSpawner.gd" id="4_spawner"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rvu7i"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -73,17 +74,8 @@ surface_material_override/0 = SubResource("StandardMaterial3D_njov2")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D2" unique_id=1297140077]
 shape = SubResource("BoxShape3D_2au82")
 
-[node name="Pedestrian" type="CharacterBody3D" parent="." unique_id=1701047962]
+[node name="Pedestrian" parent="." unique_id=319213615 instance=ExtResource("1_aq4fw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, 0)
-script = ExtResource("1_myinc")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian" unique_id=2118982375]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian" unique_id=537258759]
-mesh = SubResource("CylinderMesh_2mnig")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian" unique_id=1742566815]
 
 [node name="Pedestrian2" type="CharacterBody3D" parent="." unique_id=135513922]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.81585, 1.9430935, 0)
@@ -292,10 +284,10 @@ mesh = SubResource("CylinderMesh_2mnig")
 [node name="Camera3D" type="Camera3D" parent="." unique_id=596827014]
 transform = Transform3D(1, 0, 0, 0, 0.7077299, 0.7064831, 0, -0.7064831, 0.7077299, 0, 10.558638, 18.530235)
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
+[node name="Player" parent="." unique_id=31535995 instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 14)
 
-[node name="Boundary" parent="." instance=ExtResource("3_boundary")]
+[node name="Boundary" parent="." unique_id=1457880342 instance=ExtResource("3_boundary")]
 
-[node name="CrowdSpawner" type="Node" parent="."]
+[node name="CrowdSpawner" type="Node" parent="." unique_id=1611550150]
 script = ExtResource("4_spawner")

@@ -66,7 +66,17 @@ func build_crowd():
 		clone.global_position = NavigationServer3D.map_get_random_point(map, 1, true) + Vector3(0, 1.0, 0)
 
 	print("crowd size: ", crowd_size)
+	attach_signals(npcs)
 
+
+func attach_signals(npc_list):
+	#attach crowdEvents Signals to all predestrians.
+	
+	for npc in npc_list:
+		CrowdEvents.connect("gunshot", npc.fear_response)
+		CrowdEvents.connect("explosion", npc.fear_response)
+	
+	pass
 
 func _process(delta):
 	if not show_fps:
