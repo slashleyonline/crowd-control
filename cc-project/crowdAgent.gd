@@ -70,7 +70,7 @@ class FleeingState:
 		if agent.nav_agent.is_navigation_finished() or agent.fleeing_timer <= 0.0:
 			agent.fleeing_timer = randf_range(agent.min_fleeing_time, agent.max_fleeing_time)
 			#reached a "safe" spot - cool down before normal crowd behavior
-			print('safe!')
+			#print('safe!')
 			agent.start_returning()
 			return Vector3.ZERO
 		
@@ -164,6 +164,7 @@ var navigation_ready = false
 var _debug_last_state = null
 
 @onready var nav_agent = $NavigationAgent3D
+
 @onready var label = $Label3D
 
 func _ready():
@@ -289,23 +290,24 @@ func is_stuck() -> bool:
 func fear_response(position, loudness):
 	#called when the CrowdEvent for explosions or gunshots fires a signal.
 	#depending on the position andd radius, pedestrian must switch to a fear state.
-	print(self.global_position.distance_to(position))
+	#print(self.global_position.distance_to(position))
 	if self.global_position.distance_to(position) <= loudness:
 		fleeing_state.threat_position = position
 		fleeing_state.radius = loudness
 		flee_radius(position, loudness)
-		print('heard!')
+		#print('heard!')
 		state = fleeing_state
 
 func _physics_process(_delta: float) -> void:
 	#prints once per change so you can confirm Return in the Output panel
 	if state != _debug_last_state:
 		_debug_last_state = state
-		print(name, " -> ", _state_label(state))
+		#print(name, " -> ", _state_label(state))
 		label.text = _state_label(state)
-
+	
+	#rotate the model in the direction of movement.
+	
 	var new_velocity=state.update(self)
-
 	#hand the velocity we want to the navigation server. it adjusts it to
 	#dodge nearby agents and hands it back through velocity_computed.
 	if navigation_ready:

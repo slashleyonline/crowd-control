@@ -73,9 +73,8 @@ func build_crowd():
 
 func attach_signals(npc_list):
 	#attach crowdEvents Signals to all predestrians.
-	
 	for npc in npc_list:
-		print('connected!')
+		#print('connected!')
 		CrowdEvents.connect("gunshot", npc.fear_response)
 		CrowdEvents.connect("explosion", npc.fear_response)
 	
