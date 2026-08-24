@@ -35,7 +35,17 @@ class WalkingState:
 		return direction.normalized() * agent.speed 
 
 class FrozenState:
-	pass
+	#stand still while the gun is on us. when the timer runs out we flee,
+	#matching the readme: freeze briefly when threatened, then run.
+	func update(agent):
+		agent.freeze_timer -= agent.get_physics_process_delta_time()
+
+		if agent.freeze_timer <= 0.0:
+			#no gunshot position here, so pick any far nav point and run
+			agent.randomize_target_location()
+			agent.state = agent.fleeing_state
+
+		return Vector3.ZERO
 
 class FleeingState:
 	#set position of event that  NPC is fleeing from. 
@@ -89,9 +99,13 @@ var state=idle_state
 #how long an npc pushes against something before choosing a new destination
 @export var stuck_give_up_time = 2.0
 
+#how long an aimed-at npc freezes before switching to fleeing
+@export var freeze_duration = 0.8
+
 #this npc's own rolled values
 var speed = 3.0
 var idle_timer = 0.0
+var freeze_timer = 0.0
 
 #true while the player's gun is pointed at this npc. set by the player,
 #read by the fsm - a FrozenState can just check this in its update().
@@ -179,11 +193,19 @@ func random_target_location_outside_radius(position, radius):
 #only called when the target changes, not every frame.
 func set_aimed_at(aimed: bool):
 	is_aimed_at = aimed
+	#if the gun just landed on us and we are not already reacting, freeze
+	if aimed and state != frozen_state and state != fleeing_state:
+		start_frozen()
 
 #stand still for a random moment before walking somewhere new
 func start_idle():
 	idle_timer = randf_range(min_idle_time, max_idle_time)
 	state = idle_state
+
+#lock up briefly when the player aims at this npc, then flee
+func start_frozen():
+	freeze_timer = freeze_duration
+	state = frozen_state
 
 #true once we have spent stuck_give_up_time hardly moving while walking
 func is_stuck() -> bool:
