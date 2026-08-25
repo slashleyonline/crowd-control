@@ -40,8 +40,9 @@ func interact(body):
 		#vector between the door and the body.
 		var b = (body.get_position() - self.get_position()).normalized()
 		
-		if body.name == "Player":
-			print(rad_to_deg(acos(a.dot(b))))
+		#debug leftover: printed the door angle every time the player opened one
+		#if body.name == "Player":
+		#	print(rad_to_deg(acos(a.dot(b))))
 		if acos(a.dot(b)) <= deg_to_rad(90):
 			front = false
 		else:

@@ -5,8 +5,9 @@ extends Node
 
 @export var crowd_size = 18
 
-#prints the frame rate every few seconds so we can write the numbers down
-@export var show_fps = true
+#prints the frame rate every few seconds. off by default now that the player
+#HUD shows it live; turn it on when capturing numbers for the write-up.
+@export var show_fps = false
 
 #how many npcs walk together in a single-file marching line. 0 turns it off.
 #the first one is the leader and wanders normally; the rest follow behind it.

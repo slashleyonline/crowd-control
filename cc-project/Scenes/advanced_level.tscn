@@ -442,7 +442,7 @@ collision_mask = 3
 
 [node name="CrowdSpawner" type="Node" parent="." unique_id=1611550150]
 script = ExtResource("7_hqie5")
-crowd_size = 200
+crowd_size = 50
 dict_hair = {
 "Bald": ExtResource("9_pagjx"),
 "Combover": ExtResource("10_t5y7c"),

@@ -34,8 +34,9 @@ func update_chair(chair_body):
 func call_for_march(leader):
 	march_call.emit(leader)
 
-#TEMPORARY: press G to fake a gunshot at the camera so the npc danger states
-#can be tested before the player controller exists. delete once the player fires.
+#press G for a gunshot at the camera without having to aim. kept deliberately:
+#it is the easiest way to set the crowd off while showing the scene from the
+#overhead camera during a demo.
 func _unhandled_key_input(event):
 	#echo check stops held keys from firing hundreds of shots per second
 	if event.is_pressed() and not event.echo and event.keycode == KEY_G:

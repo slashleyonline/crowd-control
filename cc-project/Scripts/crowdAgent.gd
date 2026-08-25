@@ -425,7 +425,7 @@ var state=idle_state
 #how far above the seat surface to put the hip joint. the bone sits inside the
 #mesh rather than on the skin, so a small lift stops the seat clipping into the
 #backside. everything else about the placement is measured at runtime.
-@export var sit_surface_offset = 0.15
+@export var sit_surface_offset = 0.20
 
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
