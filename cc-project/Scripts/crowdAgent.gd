@@ -627,7 +627,20 @@ func flee_radius(position, _radius):
 	# Given a threat position, pick somewhere to run that is away from it and
 	# actually reachable.
 
-	var flee_direction = (global_position - position).normalized()
+	var flee_direction = global_position - position
+	flee_direction.y = 0.0
+
+	#standing right on top of the threat leaves no direction to run in.
+	#normalizing a zero vector gives zero, so the flee target landed on our own
+	#feet, navigation called the trip finished on the very first frame, and we
+	#went straight back to normal without ever running. that is exactly the
+	#point-blank case a player creates by shooting someone next to them.
+	if flee_direction.length_squared() < 0.01:
+		flee_direction = Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0))
+		if flee_direction.length_squared() < 0.0001:
+			flee_direction = Vector3(1, 0, 0)
+
+	flee_direction = flee_direction.normalized()
 
 	#we used to aim radius * 1.5 away. the gunshot radius is 50m, which is most
 	#of the level, so that target always landed well outside the walkable area.
