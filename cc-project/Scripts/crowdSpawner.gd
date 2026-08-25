@@ -119,6 +119,9 @@ func form_march_group(npc_list, map):
 
 	var leader = npc_list[0]
 	leader.is_march_leader = true
+	leader.march_followers = march_group_size - 1
+	#the scripted demo group should not quietly disband part way through
+	leader.march_lead_timer = INF
 
 	#the leader walks slower than its followers, otherwise a fast leader is
 	#simply uncatchable and the line never closes up

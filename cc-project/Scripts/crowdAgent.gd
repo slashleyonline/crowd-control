@@ -12,6 +12,10 @@ class IdleState:
 		if agent.try_start_stare():
 			return Vector3.ZERO
 
+		#occasionally decide to get a walking group together
+		if agent.try_start_march_group():
+			return Vector3.ZERO
+
 		if agent.idle_timer <= 0.0:
 			#random chance that agent seeks out a chair
 
@@ -440,6 +444,15 @@ var state=idle_state
 @export var stare_duration_min = 1.5
 @export var stare_duration_max = 3.5
 
+#chance per second that a bored, idle npc decides to start a walking group
+@export var march_call_chance_per_second = 0.03
+#how far away someone can hear that call and come over
+@export var march_join_range = 35.0
+#most people that will fall in behind one leader
+@export var march_group_max = 5
+#how long a leader keeps its group together before everyone goes back to normal
+@export var march_lead_duration = 45.0
+
 #marching: how far apart people stand in the line. avoidance already keeps
 #agents about 1.4m apart, so anything near that has them shoving each other.
 @export var march_spacing = 2.2
@@ -473,6 +486,9 @@ var march_slot = 0
 var is_march_leader = false
 var march_repath_timer = 0.0
 var march_force_path_timer = 0.0
+#leaders only: how many have fallen in, and how long left before disbanding
+var march_followers = 0
+var march_lead_timer = 0.0
 #breadcrumbs of where this npc has walked, newest first. only a march leader
 #fills this in; its followers read it to walk the same route.
 var march_trail: Array[Vector3] = []
@@ -514,6 +530,9 @@ var head_bone = -1
 func _ready():
 	#lets the player's aim raycast tell npcs apart from walls and floors
 	add_to_group("npc")
+
+	#listen for anyone putting a call out for a walking group
+	CrowdEvents.march_call.connect(_on_march_call)
 
 	#bone indices kept so we can reset if a look pose ever gets stuck
 	neck_bone = skeleton.find_bone("Neck")
@@ -611,9 +630,56 @@ func set_aimed_at(aimed: bool):
 	if aimed and state != frozen_state and state != fleeing_state:
 		start_frozen()
 
+#roll whether a bored npc decides to start a walking group and put a call out
+func try_start_march_group() -> bool:
+	if is_march_leader or march_leader != null:
+		return false
+
+	var chance = march_call_chance_per_second * get_physics_process_delta_time()
+	if randf() > chance:
+		return false
+
+	is_march_leader = true
+	march_followers = 0
+	march_lead_timer = march_lead_duration
+	march_trail.clear()
+	CrowdEvents.call_for_march(self)
+	return true
+
+
+#someone nearby wants company. fall in behind them if we are free to.
+func _on_march_call(leader):
+	if leader == self or not is_instance_valid(leader):
+		return
+	#already busy leading, following, sitting, or reacting to danger
+	if is_march_leader or march_leader != null:
+		return
+	if state != idle_state and state != walking_state:
+		return
+	if leader.march_followers >= march_group_max:
+		return
+	if global_position.distance_to(leader.global_position) > march_join_range:
+		return
+
+	leader.march_followers += 1
+	#we walk to the leader first: MarchingState aims at their trail, and an
+	#empty trail just means "go stand where the leader is"
+	join_march(leader, leader, leader.march_followers)
+
+
+#stop leading and let everyone drift back to normal crowd behaviour
+func end_march_group():
+	is_march_leader = false
+	march_followers = 0
+	march_trail.clear()
+
+
 #is the line we belong to still intact
 func march_is_valid() -> bool:
-	return march_leader != null and is_instance_valid(march_leader)
+	if march_leader == null or not is_instance_valid(march_leader):
+		return false
+	#the leader can call time on the group, which sends everyone back to normal
+	return march_leader.is_march_leader
 
 #walk back along the leader's breadcrumb trail until we have covered our own
 #place in the line, and stand there
@@ -784,6 +850,13 @@ func _physics_process(_delta: float) -> void:
 	
 	#remember which way we are heading so whoever is following us knows
 	#where "behind" is. three floats per agent per frame.
+	#a leader keeps its group together for a while, then calls time and
+	#everyone drifts back to ordinary crowd behaviour
+	if is_march_leader:
+		march_lead_timer -= _delta
+		if march_lead_timer <= 0.0:
+			end_march_group()
+
 	#a march leader drops a breadcrumb every so often so its followers can walk
 	#the exact route it took. only leaders pay for this.
 	if is_march_leader:

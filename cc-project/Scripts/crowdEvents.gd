@@ -14,6 +14,11 @@ signal explosion(position: Vector3, radius: float)
 #someone sat in a chair, making npcs change state or avoid sitting in the chair.
 signal chair_updated(chair_body)
 
+#an npc has decided to lead a walking group and wants company. anyone free and
+#close enough can fall in behind them. broadcast for the same reason gunfire is:
+#the caller has no idea who is nearby, and does not need to.
+signal march_call(leader)
+
 #how far a gunshot carries by default. the map is 40x40 so this covers most of it.
 const GUNSHOT_LOUDNESS = 50.0
 
@@ -25,6 +30,9 @@ func report_explosion(position: Vector3, radius: float):
 
 func update_chair(chair_body):
 	chair_updated.emit(chair_body)
+
+func call_for_march(leader):
+	march_call.emit(leader)
 
 #TEMPORARY: press G to fake a gunshot at the camera so the npc danger states
 #can be tested before the player controller exists. delete once the player fires.
