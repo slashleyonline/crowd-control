@@ -9,6 +9,14 @@ extends CharacterBody3D
 #if we ever end up below this we have fallen out of the world
 @export var fall_limit = -5.0
 
+#how far the blast is heard, and where it lands if we are aiming at open sky.
+#the map is 120m across with a sparse crowd, so a small radius catches nobody:
+#at 12m it reached under one person on average.
+@export var explosion_radius = 25.0
+@export var explosion_throw_distance = 15.0
+
+const EXPLOSION_SCENE = preload("res://Scenes/Explosion.tscn")
+
 #where to put us back if that happens
 var spawn_position = Vector3.ZERO
 
@@ -41,6 +49,10 @@ func _unhandled_input(event):
 
 		#stops the camera tipping over backwards at the top and bottom
 		camera.rotation.x = clamp(camera.rotation.x, -PI / 2, PI / 2)
+
+	#set off an explosion where we are looking
+	if event.is_action_pressed("explode"):
+		throw_explosion()
 
 	#escape releases the mouse so we can get back to the editor
 	if event.is_action_pressed("ui_cancel"):
@@ -105,6 +117,26 @@ func update_aim():
 		hit.set_aimed_at(true)
 
 	aim_target = hit
+
+
+#drop an explosion wherever we are looking. the blast node announces itself
+#through CrowdEvents, so the crowd reacts to the event rather than to the node.
+func throw_explosion():
+	var spot: Vector3
+
+	if aim_ray.is_colliding():
+		#land it on whatever we are pointing at
+		spot = aim_ray.get_collision_point()
+	else:
+		#aiming at open sky, so drop it a fixed distance ahead of us instead
+		spot = camera.global_position - camera.global_transform.basis.z * explosion_throw_distance
+
+	var blast = EXPLOSION_SCENE.instantiate()
+	blast.radius = explosion_radius
+	get_tree().current_scene.add_child(blast)
+	blast.global_position = spot
+
+	print("explosion at ", spot, " radius ", explosion_radius)
 
 
 #pulling the trigger. we do not model bullets, we just announce the noise

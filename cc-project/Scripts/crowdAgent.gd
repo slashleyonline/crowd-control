@@ -423,6 +423,12 @@ var state=idle_state
 #this is the dial to turn if the pose still looks off: higher = sits higher.
 @export var sit_height_offset = 0.01
 
+#how far forward of the chair's centre to sit. seated thighs slope down toward
+#the knees, but the seat's top face is flat, so a seat centred under the pelvis
+#pokes up through the legs. sitting nearer the front edge puts the thighs out
+#past the box instead of inside it.
+@export var sit_forward_offset = 0.16
+
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
 
@@ -712,10 +718,18 @@ func clear_head_look():
 #where to stand an npc so it looks seated: over the chair, but at the height
 #it would normally stand at rather than sunk into the chair's own origin
 func chair_sit_position(chair) -> Vector3:
+	#chair.gd turns us to face the chair's +x, so that is our "forward"
+	var forward = chair.global_transform.basis.x
+	forward.y = 0.0
+	if forward.length_squared() > 0.0001:
+		forward = forward.normalized()
+	else:
+		forward = Vector3.ZERO
+
 	return Vector3(
 		chair.global_position.x,
 		chair.global_position.y + sit_height_offset,
-		chair.global_position.z)
+		chair.global_position.z) + forward * sit_forward_offset
 
 #true once we have spent stuck_give_up_time hardly moving while walking
 func is_stuck() -> bool:
