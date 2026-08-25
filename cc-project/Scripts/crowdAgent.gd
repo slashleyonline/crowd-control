@@ -290,6 +290,10 @@ class DoorState:
 			
 			time += agent.get_physics_process_delta_time()
 			if time >= waitTime:
+				#reset both, or the next door we meet starts already "opened"
+				#with a stale timer and we get stranded in the doorway
+				time = 0
+				agent.door_state.current_door_state = agent.door_state.move_to_pos_state
 				agent.update_target_location(agent.door_state.prev_target)
 				agent.state = agent.door_state.prev_state
 			
@@ -349,8 +353,11 @@ class ChairSittingState:
 		return Vector3.ZERO
 	
 	func move_npc(agent, status):
-		var collision = agent.get_node("CollisionShape3D")
-		collision.disabled = status
+		#we used to disable the collision shape while seated. that made seated
+		#npcs invisible to the player's aim ray, and because this only runs
+		#when the sit timer expires, anything else that pulled them out of the
+		#chair (a gunshot, being aimed at) left collision off for good and they
+		#fell through the floor.
 		if chair != null:
 			agent.global_position = agent.chair_sit_position(chair)
 
@@ -404,10 +411,11 @@ var state=idle_state
 @export var flee_distance = 25.0
 
 #where to put an npc, relative to the chair node's origin, so the sitting pose
-#lands properly. the pose puts the hips 0.16 above the npc origin and the feet
-#0.66 below it, and the seat top is 0.81 above the floor, so -0.10 puts the
-#hips on the seat and the feet on the ground at the same time.
-@export var sit_height_offset = -0.10
+#lands properly. measured from the rig: the Hip bones (what actually rests on
+#the seat) sit 0.03 below the npc origin and the feet 0.63 below it. with the
+#seat top 0.60 above the floor, -0.12 puts the hips on the seat and the feet
+#on the ground at once.
+@export var sit_height_offset = -0.12
 
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
@@ -481,6 +489,7 @@ var _debug_last_state = null
 var chairs = null
 
 @onready var nav_agent = $NavigationAgent3D
+@onready var collision_shape = $CollisionShape3D
 @onready var mesh = $PedBase
 @onready var skeleton = $PedBase/Armature/Skeleton3D
 @onready var interact_ray = $PedBase/InteractionRayCast
@@ -763,6 +772,11 @@ func _physics_process(_delta: float) -> void:
 			if march_trail.size() > MARCH_TRAIL_MAX:
 				march_trail.resize(MARCH_TRAIL_MAX)
 
+	#belt and braces: whatever route we took out of a chair, make sure we can
+	#collide with the world again before we try to walk on it
+	if state != sitting_state and collision_shape.disabled:
+		collision_shape.disabled = false
+
 	var new_velocity=state.update(self)
 
 	#rotate the model in the direction of movement; stare handles its own facing.
@@ -772,6 +786,14 @@ func _physics_process(_delta: float) -> void:
 		anim_player.play("Walk")
 	elif state == stare_state or state == idle_state or state == frozen_state:
 		anim_player.play("Idle")
+
+	#a seated npc is placed by hand each frame. running move_and_slide on a
+	#standing capsule that overlaps the chair just shoves them back off it, so
+	#skip physics movement entirely while sitting. the collider stays enabled,
+	#which is what lets the player still aim at and shoot them.
+	if state == sitting_state:
+		velocity = Vector3.ZERO
+		return
 
 	#hand the velocity we want to the navigation server. it adjusts it to
 	#dodge nearby agents and hands it back through velocity_computed.
@@ -807,6 +829,11 @@ func _state_label(s) -> String:
 
 #the navigation server's answer: our velocity, adjusted to miss the neighbours
 func _on_velocity_computed(safe_velocity: Vector3):
+	#the navigation server fires this every physics tick once avoidance is on,
+	#not only when we call set_velocity. a seated npc is placed by hand, so
+	#letting move_and_slide run here shoved them straight back off the chair.
+	if state == sitting_state:
+		return
 	apply_velocity(safe_velocity)
 
 func check_door_interact():
