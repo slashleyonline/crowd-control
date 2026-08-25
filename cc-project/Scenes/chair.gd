@@ -23,7 +23,13 @@ func interact(body):
 		anim_player.play("Sit")
 		#removed: var mesh = get_node("PedBase") - looked for PedBase on the
 		#chair rather than the pedestrian, and the result was never used
-		body.look_at(self.global_position + global_basis.x)
+		#look_at aims the body's -Z fully at the target in 3D, so a target at a
+		#different height pitches the whole body over. this chair sits below a
+		#pedestrian, which tipped them forward, and the tilt stayed with them
+		#after they stood up again. flatten the target to our own height first.
+		var face_point = self.global_position + global_basis.x
+		face_point.y = body.global_position.y
+		body.look_at(face_point)
 		chair_sat.emit(self)
 	#when interacted, should make the body play an animation and sit in the chair.
 	

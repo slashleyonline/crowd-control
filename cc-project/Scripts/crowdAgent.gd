@@ -353,6 +353,13 @@ class ChairSittingState:
 		collision.disabled = status
 		if chair != null:
 			agent.global_position = agent.chair_sit_position(chair)
+
+		if not status:
+			#the chair rotated our whole body to face it. everywhere else only
+			#the mesh child is turned, so leftover body rotation makes us walk
+			#crooked. clear it on the way out of the seat.
+			agent.rotation = Vector3.ZERO
+
 		npc_reoriented = status
 
 #starts in the idle state
@@ -396,9 +403,11 @@ var state=idle_state
 #destination is actually reachable instead of a point past the boundary.
 @export var flee_distance = 25.0
 
-#the chair node's origin sits below where a pedestrian stands, so dropping an
-#npc straight onto it buries them. this lifts them back to seat height.
-@export var sit_height_offset = 0.25
+#where to put an npc, relative to the chair node's origin, so the sitting pose
+#lands properly. the pose puts the hips 0.16 above the npc origin and the feet
+#0.66 below it, and the seat top is 0.81 above the floor, so -0.10 puts the
+#hips on the seat and the feet on the ground at the same time.
+@export var sit_height_offset = -0.10
 
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
