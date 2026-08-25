@@ -411,6 +411,16 @@ var state=idle_state
 #how long an npc pushes against something before choosing a new destination
 @export var stuck_give_up_time = 2.0
 
+#how steady this npc's nerves are. 0 is jumpy, 1 is unflappable. rolled once
+#per pedestrian in _ready and used to scale the three reaction numbers below,
+#so the same gunshot does not flip the whole crowd on the same frame.
+#
+#this matters for the premise rather than for looks: if every npc reacts
+#identically, a human player who reacts even slightly differently stands out
+#immediately, which is the opposite of hiding in a crowd.
+@export var min_courage = 0.0
+@export var max_courage = 1.0
+
 #how long an aimed-at npc freezes before switching to fleeing
 @export var freeze_duration = 0.8
 
@@ -462,6 +472,9 @@ var state=idle_state
 @export var march_unstick_time = 3.0
 
 #this npc's own rolled values
+var courage = 0.5
+#a jumpy npc effectively hears danger from further away
+var hearing_scale = 1.0
 var speed = 3.0
 var idle_timer = 0.0
 var fleeing_timer = 0.0
@@ -545,6 +558,15 @@ func _ready():
 
 	speed = randf_range(min_speed, max_speed)
 	last_position = global_position
+
+	#roll this pedestrian's nerve and bake it into their reaction numbers once,
+	#so nothing extra has to be computed while the game is running
+	courage = randf_range(min_courage, max_courage)
+	#the jumpy ones notice a shot from further off, the steady ones need it close
+	hearing_scale = lerp(1.35, 0.70, courage)
+	#and they break from a freeze sooner, and take longer to settle afterwards
+	freeze_duration *= lerp(0.45, 1.75, courage)
+	return_cooldown *= lerp(1.80, 0.60, courage)
 
 	#hold still until navigation is ready below, otherwise the idle state
 	#would ask for a path before the map exists
@@ -856,7 +878,9 @@ func fear_response(position, loudness):
 	#called when the CrowdEvent for explosions or gunshots fires a signal.
 	#depending on the position andd radius, pedestrian must switch to a fear state.
 	#print(self.global_position.distance_to(position))
-	if self.global_position.distance_to(position) <= loudness:
+	#scaled by nerve, so a single gunshot spreads outward through the crowd
+	#instead of flipping everyone within the radius on the same frame
+	if self.global_position.distance_to(position) <= loudness * hearing_scale:
 		clear_head_look()
 		fleeing_state.threat_position = position
 		fleeing_state.radius = loudness
