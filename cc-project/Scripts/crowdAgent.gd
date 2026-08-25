@@ -411,11 +411,17 @@ var state=idle_state
 @export var flee_distance = 25.0
 
 #where to put an npc, relative to the chair node's origin, so the sitting pose
-#lands properly. measured from the rig: the Hip bones (what actually rests on
-#the seat) sit 0.03 below the npc origin and the feet 0.63 below it. with the
-#seat top 0.60 above the floor, -0.12 puts the hips on the seat and the feet
-#on the ground at once.
-@export var sit_height_offset = -0.12
+#lands properly.
+#
+#measured from the rig: the Hip bones sit 0.03 below the npc origin and the
+#Foot bones 0.63 below it. those are joints, though, not the visible surface -
+#Hip is inside the pelvis and Foot is the ankle - so lining the bones up with
+#the seat left the box poking up into the body and the toes through the floor.
+#lifting by about 0.08 puts the visible backside on the seat and the soles on
+#the ground.
+#
+#this is the dial to turn if the pose still looks off: higher = sits higher.
+@export var sit_height_offset = -0.04
 
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
