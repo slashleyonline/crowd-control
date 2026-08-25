@@ -6,7 +6,6 @@ signal chair_sat
 
 # Called when the node enters the scene tree for the first time.
 func interact(body):
-	print("sitting")
 	if sitting_body != null and body != sitting_body:
 		return
 	elif sitting_body != null and body == sitting_body:
@@ -26,5 +25,4 @@ func interact(body):
 	#automatically close after some time.
 
 func check_sitting():
-	print(sitting_body)
 	return sitting_body != null

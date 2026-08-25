@@ -22,7 +22,6 @@ class IdleState:
 					var target_chair = agent.chairs[idx]
 
 					#move to seeking chair state
-					print(target_chair.global_position)
 					agent.update_target_location(target_chair.global_position)
 					agent.locate_chair_state.chair = target_chair
 					agent.state = agent.locate_chair_state
@@ -227,7 +226,6 @@ class LocateChairState:
 	func update(agent):
 		if agent.global_position.distance_to(agent.nav_agent.target_location) < 4 \
 			and !chair.check_sitting():
-			print('found chair')
 			agent.sitting_state.chair = chair
 			chair.interact(agent)
 			agent.state = agent.sitting_state
@@ -529,7 +527,6 @@ func is_stuck() -> bool:
 	return false
 
 func update_chair(chair_body):
-	print('updating chairs')
 	for i in chairs:
 		if chair_body.uid == chairs[i].uid:
 			var staticbody = chair_body.get_node("StaticBody3D")
