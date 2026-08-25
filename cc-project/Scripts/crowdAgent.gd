@@ -421,7 +421,7 @@ var state=idle_state
 #the ground.
 #
 #this is the dial to turn if the pose still looks off: higher = sits higher.
-@export var sit_height_offset = -0.04
+@export var sit_height_offset = 0.01
 
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
