@@ -345,14 +345,14 @@ class ChairSittingState:
 			return Vector3.ZERO
 
 		agent.anim_player.play("Sitting")
-		agent.global_position = chair.global_position + Vector3(0,0,0)
+		agent.global_position = agent.chair_sit_position(chair)
 		return Vector3.ZERO
 	
 	func move_npc(agent, status):
 		var collision = agent.get_node("CollisionShape3D")
 		collision.disabled = status
 		if chair != null:
-			agent.global_position = chair.global_position
+			agent.global_position = agent.chair_sit_position(chair)
 		npc_reoriented = status
 
 #starts in the idle state
@@ -395,6 +395,10 @@ var state=idle_state
 #how far an npc runs when it panics. kept well inside the level so the
 #destination is actually reachable instead of a point past the boundary.
 @export var flee_distance = 25.0
+
+#the chair node's origin sits below where a pedestrian stands, so dropping an
+#npc straight onto it buries them. this lifts them back to seat height.
+@export var sit_height_offset = 0.25
 
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
@@ -680,6 +684,14 @@ func clear_head_look():
 		skeleton.reset_bone_pose(neck_bone)
 	if head_bone >= 0:
 		skeleton.reset_bone_pose(head_bone)
+
+#where to stand an npc so it looks seated: over the chair, but at the height
+#it would normally stand at rather than sunk into the chair's own origin
+func chair_sit_position(chair) -> Vector3:
+	return Vector3(
+		chair.global_position.x,
+		chair.global_position.y + sit_height_offset,
+		chair.global_position.z)
 
 #true once we have spent stuck_give_up_time hardly moving while walking
 func is_stuck() -> bool:
