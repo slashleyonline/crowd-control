@@ -112,7 +112,16 @@ func update_aim():
 func fire():
 	CrowdEvents.report_gunshot(global_position)
 
-	if aim_target != null:
-		print("fired at ", aim_target.name)
+	#aim_target only gets set while the right mouse button is held (that is
+	#what makes npcs freeze), so reporting it here made every ordinary shot
+	#say "nothing". check what the ray is actually on instead.
+	var shot = null
+	if aim_ray.is_colliding():
+		var collider = aim_ray.get_collider()
+		if collider != null and collider.is_in_group("npc"):
+			shot = collider
+
+	if shot != null:
+		print("fired at ", shot.name)
 	else:
 		print("fired at nothing")

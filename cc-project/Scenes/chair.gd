@@ -15,10 +15,15 @@ func interact(body):
 	if body.is_in_group("npc"):
 		sitting_body = body
 
-	if body.get_node("AnimationPlayer") != null:
-		var anim_player = body.get_node("AnimationPlayer")
+	#a pedestrian's AnimationPlayer lives under PedBase, not at its root, so
+	#get_node("AnimationPlayer") threw and aborted the rest of this function.
+	#that left the chair marked occupied forever and the npc stuck walking to
+	#it. get_node_or_null also keeps this safe for anything without one.
+	var anim_player = body.get_node_or_null("PedBase/AnimationPlayer")
+	if anim_player != null:
 		anim_player.play("Sit")
-		var mesh = get_node("PedBase")
+		#removed: var mesh = get_node("PedBase") - looked for PedBase on the
+		#chair rather than the pedestrian, and the result was never used
 		body.look_at(self.global_position + global_basis.x)
 		chair_sat.emit(self)
 	#when interacted, should make the body play an animation and sit in the chair.
@@ -26,5 +31,7 @@ func interact(body):
 	#automatically close after some time.
 
 func check_sitting():
-	print(sitting_body)
+	#this runs twice a frame for every npc walking to a chair, so the debug
+	#print here floods the console with "null" whenever nobody is sitting
+	#print(sitting_body)
 	return sitting_body != null

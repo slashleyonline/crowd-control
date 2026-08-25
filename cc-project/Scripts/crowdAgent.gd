@@ -82,9 +82,12 @@ class WalkingState:
 		return direction.normalized() * agent.speed 
 
 class MarchingState:
-	#single file line. each npc follows whoever is directly in front of it
-	#rather than a fixed offset from the leader, so the line bends around
-	#corners instead of every slot swinging sideways when the leader turns.
+	#single file line. followers walk the leader's own breadcrumb trail rather
+	#than steering at a point behind the person ahead of them. that matters for
+	#two reasons: the trail is by definition walkable, so nobody cuts a corner
+	#into a wall, and every follower reads the same clean source instead of
+	#chaining off a neighbour's jittery heading, which used to make the wobble
+	#grow with every place down the line.
 	func update(agent):
 		if not agent.march_is_valid():
 			agent.march_leader = null
@@ -99,24 +102,38 @@ class MarchingState:
 		to_slot.y = 0.0
 		var gap = to_slot.length()
 
-		#close enough. hold still rather than shuffling on the spot.
 		if gap < agent.march_slot_tolerance:
+			#in place. clear the stuck tracker, otherwise standing still on
+			#purpose gets mistaken for being jammed against something.
+			agent.stuck_timer = 0.0
+			agent.last_position = agent.global_position
 			return Vector3.ZERO
+
+		#only check for being jammed when we are actually trying to travel.
+		#easing into a slot right in front of us is slow on purpose, and that
+		#would otherwise keep tripping the stuck detector.
+		if gap > agent.march_path_distance:
+			if agent.is_stuck():
+				agent.march_force_path_timer = agent.march_unstick_time
+				agent.update_target_location(slot)
+		else:
+			agent.stuck_timer = 0.0
+			agent.last_position = agent.global_position
+
+		agent.march_force_path_timer -= agent.get_physics_process_delta_time()
 
 		var direction: Vector3
 
-		if gap <= agent.march_path_distance:
-			#the slot is close and almost always in open floor right behind
-			#someone, so walk straight at it. going through navigation here
-			#makes the agent stop about a metre short, because that is when
-			#NavigationAgent3D calls the trip finished.
+		if gap <= agent.march_path_distance and agent.march_force_path_timer <= 0.0:
+			#the trail point is close and the leader already walked it, so
+			#heading straight there is safe and much crisper than pathing
 			direction = to_slot
 		else:
-			#far enough that a wall could be in the way, so use a real path.
-			#the slot moves every frame but re-pathing every frame is what
-			#makes follow behaviour expensive, so only a few times a second.
+			#a long way back, or we just got stuck, so use a real path. the
+			#target moves constantly and re-pathing every frame is what makes
+			#follow behaviour expensive, so only a few times a second.
 			agent.march_repath_timer -= agent.get_physics_process_delta_time()
-			if agent.march_repath_timer <= 0.0 or agent.is_stuck():
+			if agent.march_repath_timer <= 0.0:
 				agent.march_repath_timer = agent.march_repath_interval
 				agent.update_target_location(slot)
 
@@ -127,10 +144,17 @@ class MarchingState:
 		#marchers still open doors like everyone else
 		agent.check_door_interact()
 
-		#hurry a little when the line has stretched out, so it closes back up
+		var catch_up_gap = agent.march_slot_tolerance * 3.0
 		var march_speed = agent.speed
-		if gap > agent.march_slot_tolerance * 3.0:
+
+		if gap > catch_up_gap:
+			#well behind, so hurry up and close the distance
 			march_speed = agent.speed * 1.4
+		else:
+			#ease in as we approach rather than running flat out then stopping
+			#dead, which makes a line bounce and zigzag. the floor stops them
+			#crawling so slowly that they look frozen.
+			march_speed = agent.speed * max(gap / catch_up_gap, 0.35)
 
 		return direction.normalized() * march_speed
 
@@ -381,8 +405,9 @@ var state=idle_state
 @export var stare_duration_min = 1.5
 @export var stare_duration_max = 3.5
 
-#marching: how far apart people stand in the line
-@export var march_spacing = 1.6
+#marching: how far apart people stand in the line. avoidance already keeps
+#agents about 1.4m apart, so anything near that has them shoving each other.
+@export var march_spacing = 2.2
 #how close to our slot counts as being in place
 @export var march_slot_tolerance = 0.6
 #seconds between path updates while following a moving slot
@@ -391,6 +416,9 @@ var state=idle_state
 #navigation agent reports "arrived" about a metre out, which left followers
 #parked just short of their slot.
 @export var march_path_distance = 4.0
+#after walking into something, how long to use real paths instead of
+#steering straight at the slot
+@export var march_unstick_time = 3.0
 
 #this npc's own rolled values
 var speed = 3.0
@@ -409,6 +437,14 @@ var march_ahead = null
 var march_slot = 0
 var is_march_leader = false
 var march_repath_timer = 0.0
+var march_force_path_timer = 0.0
+#breadcrumbs of where this npc has walked, newest first. only a march leader
+#fills this in; its followers read it to walk the same route.
+var march_trail: Array[Vector3] = []
+#metres between breadcrumbs, and how many to keep. 64 x 0.4m is about 25m of
+#history, plenty for any line we would actually show.
+const MARCH_TRAIL_STEP = 0.4
+const MARCH_TRAIL_MAX = 64
 #the leader's last travel direction, so followers know where "behind" is
 var march_forward = Vector3(0, 0, -1)
 
@@ -535,15 +571,32 @@ func set_aimed_at(aimed: bool):
 
 #is the line we belong to still intact
 func march_is_valid() -> bool:
-	if march_ahead == null or not is_instance_valid(march_ahead):
-		return false
-	if march_leader == null or not is_instance_valid(march_leader):
-		return false
-	return true
+	return march_leader != null and is_instance_valid(march_leader)
 
-#stand one spacing behind whoever is directly in front of us
+#walk back along the leader's breadcrumb trail until we have covered our own
+#place in the line, and stand there
 func march_slot_position() -> Vector3:
-	return march_ahead.global_position - march_ahead.march_forward * march_spacing
+	var trail = march_leader.march_trail
+	if trail.is_empty():
+		return march_leader.global_position
+
+	var wanted_distance = march_spacing * march_slot
+	var travelled = 0.0
+	var previous = march_leader.global_position
+
+	for point in trail:
+		var segment = previous.distance_to(point)
+		if travelled + segment >= wanted_distance:
+			#interpolate inside the segment. snapping to whichever breadcrumb
+			#happens to be nearest makes the target jump 0.4m at a time, and
+			#the follower visibly twitches with every jump.
+			var along = (wanted_distance - travelled) / max(segment, 0.0001)
+			return previous.lerp(point, along)
+		travelled += segment
+		previous = point
+
+	#trail is shorter than our place in the line, so aim at its oldest point
+	return trail[trail.size() - 1]
 
 #put this npc into a marching line behind "ahead", led overall by "leader"
 func join_march(leader, ahead, slot: int):
@@ -636,11 +689,14 @@ func is_stuck() -> bool:
 	return false
 
 func update_chair(chair_body):
-	print('updating chairs')
-	for i in chairs:
-		if chair_body.uid == chairs[i].uid:
-			var staticbody = chair_body.get_node("StaticBody3D")
-			chairs[i] = chair_body
+	#fires whenever any chair changes occupancy. there is nothing to swap:
+	#"chairs" already holds these exact node references, so occupancy is
+	#visible through them directly.
+	#
+	#the previous version threw on every chair event for two reasons. nodes
+	#have no .uid property, and "for i in chairs" walks the chair objects
+	#themselves, then used one as an array index.
+	pass
 
 func fear_response(position, loudness):
 	#called when the CrowdEvent for explosions or gunshots fires a signal.
@@ -670,9 +726,13 @@ func _physics_process(_delta: float) -> void:
 	
 	#remember which way we are heading so whoever is following us knows
 	#where "behind" is. three floats per agent per frame.
-	var flat_velocity = Vector3(velocity.x, 0.0, velocity.z)
-	if flat_velocity.length_squared() > 0.25:
-		march_forward = flat_velocity.normalized()
+	#a march leader drops a breadcrumb every so often so its followers can walk
+	#the exact route it took. only leaders pay for this.
+	if is_march_leader:
+		if march_trail.is_empty() or global_position.distance_to(march_trail[0]) > MARCH_TRAIL_STEP:
+			march_trail.push_front(global_position)
+			if march_trail.size() > MARCH_TRAIL_MAX:
+				march_trail.resize(MARCH_TRAIL_MAX)
 
 	var new_velocity=state.update(self)
 

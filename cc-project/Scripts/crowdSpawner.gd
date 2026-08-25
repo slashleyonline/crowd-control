@@ -201,9 +201,12 @@ func modify_meshes(npc_list):
 		hair.mesh = hair_mesh
 		skeleton3d.add_child(hair)
 
-		mat = StandardMaterial3D.new()
-		mat.albedo_color = Color(randf_range(0,1), randf_range(0,1), randf_range(0,1))
-		hair.set_surface_override_material(0, mat)
+		#"Bald" is an empty mesh with no surfaces, so colouring surface 0
+		#throws an out-of-bounds error. nothing to colour, so skip it.
+		if hair_mesh.get_surface_count() > 0:
+			mat = StandardMaterial3D.new()
+			mat.albedo_color = Color(randf_range(0,1), randf_range(0,1), randf_range(0,1))
+			hair.set_surface_override_material(0, mat)
 	
 func _process(delta):
 	if not show_fps:
