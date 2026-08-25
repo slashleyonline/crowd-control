@@ -22,7 +22,6 @@ class IdleState:
 					var target_chair = agent.chairs[idx]
 
 					#move to seeking chair state
-					print(target_chair.global_position)
 					agent.update_target_location(target_chair.global_position)
 					agent.locate_chair_state.chair = target_chair
 					agent.state = agent.locate_chair_state
@@ -304,7 +303,6 @@ class LocateChairState:
 	func update(agent):
 		if agent.global_position.distance_to(agent.nav_agent.target_location) < 4 \
 			and !chair.check_sitting():
-			print('found chair')
 			agent.sitting_state.chair = chair
 			chair.interact(agent)
 			agent.state = agent.sitting_state
@@ -393,6 +391,10 @@ var state=idle_state
 
 #how long after fleeing before an npc resumes normal idle/walk behavior
 @export var return_cooldown = 2.0
+
+#how far an npc runs when it panics. kept well inside the level so the
+#destination is actually reachable instead of a point past the boundary.
+@export var flee_distance = 25.0
 
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
@@ -551,15 +553,21 @@ func random_target_location_outside_radius(position, radius):
 		attempts += 1
 		randomize_target_location()
 
-func flee_radius(position, radius):
-	# Given a threat/reference position and radius, find a point on the map
-	# that is both outside the radius AND roughly in the opposite direction
-	# from the threat, relative to my current position.
+func flee_radius(position, _radius):
+	# Given a threat position, pick somewhere to run that is away from it and
+	# actually reachable.
 
 	var flee_direction = (global_position - position).normalized()
 
-	var target_location = position
-	update_target_location(global_position + flee_direction * (radius * 1.5))
+	#we used to aim radius * 1.5 away. the gunshot radius is 50m, which is most
+	#of the level, so that target always landed well outside the walkable area.
+	#navigation then walked everyone into the boundary and held them there:
+	#measured 17.5% of all fleeing frames pressed against geometry.
+	var wanted = global_position + flee_direction * flee_distance
+
+	#snap onto the navmesh so the destination is somewhere we can stand
+	var map = nav_agent.get_navigation_map()
+	update_target_location(NavigationServer3D.map_get_closest_point(map, wanted))
 
 #called by the player when its aim ray enters or leaves this npc.
 #only called when the target changes, not every frame.
