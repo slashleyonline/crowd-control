@@ -162,14 +162,22 @@ class MarchingState:
 		return direction.normalized() * march_speed
 
 class FrozenState:
-	#stand still while the gun is on us. when the timer runs out we flee,
-	#matching the readme: freeze briefly when threatened, then run.
+	#stand still while the gun is on us. if the player looks away we calm down;
+	#if they keep aiming we eventually break and run.
 	func update(agent):
+		#threat withdrawn. a scare that passes is not worth running from, so
+		#walk it off rather than sprinting across the map.
+		if not agent.is_aimed_at:
+			agent.start_returning()
+			return Vector3.ZERO
+
 		agent.freeze_timer -= agent.get_physics_process_delta_time()
 
 		if agent.freeze_timer <= 0.0:
-			#no gunshot position here, so pick any far nav point and run
-			agent.randomize_target_location()
+			#still being aimed at, so panic and run away from whoever it is
+			agent.fleeing_state.threat_position = agent.aim_threat_position
+			agent.fleeing_state.radius = agent.flee_distance
+			agent.flee_radius(agent.aim_threat_position, agent.flee_distance)
 			agent.state = agent.fleeing_state
 
 		return Vector3.ZERO
@@ -489,6 +497,10 @@ var march_forward = Vector3(0, 0, -1)
 #read by the fsm - a FrozenState can just check this in its update().
 var is_aimed_at = false
 
+#where whoever aimed at us was standing, so we can run away from them rather
+#than to a random point on the map
+var aim_threat_position = Vector3.ZERO
+
 #used by is_stuck() to notice when we have stopped making progress
 var stuck_timer = 0.0
 var last_position = Vector3.ZERO
@@ -720,6 +732,12 @@ func start_idle():
 func start_frozen():
 	clear_head_look()
 	freeze_timer = freeze_duration
+
+	#note where the threat is now, while we can still see who it is
+	var player = get_tree().get_first_node_in_group("player")
+	if player != null:
+		aim_threat_position = player.global_position
+
 	state = frozen_state
 
 #cool down after fleeing before rejoining normal crowd movement
