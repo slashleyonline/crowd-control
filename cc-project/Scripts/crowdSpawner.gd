@@ -52,6 +52,7 @@ func _ready():
 
 func build_crowd():
 	var npcs = get_tree().get_nodes_in_group("npc")
+	var chairs = get_tree().get_nodes_in_group("Chair")
 	if npcs.is_empty():
 		return
 
@@ -81,6 +82,7 @@ func build_crowd():
 		#is useless when we are printing who the player shot at
 		clone.name = "Pedestrian%d" % (i + 1)
 		clone.add_to_group('npc')
+		clone.chairs = chairs
 		npcs.append(clone)
 		template.get_parent().add_child(clone)
 		
@@ -92,15 +94,18 @@ func build_crowd():
 	attach_signals(npcs)
 	modify_meshes(npcs)
 
-	print("crowd size: ", crowd_size)
-
-
 func attach_signals(npc_list):
 	#attach crowdEvents Signals to all predestrians.
 	for npc in npc_list:
 		#print('connected!')
 		CrowdEvents.connect("gunshot", npc.fear_response)
 		CrowdEvents.connect("explosion", npc.fear_response)
+		#connect chair event to npc to update chair data.
+		CrowdEvents.connect("chair_updated", npc.update_chair)
+	
+	for chair in get_tree().get_nodes_in_group("Chair"):
+		var staticbody = chair.get_node("StaticBody3D")
+		staticbody.chair_sat.connect(CrowdEvents.update_chair)
 	
 	pass
 
@@ -128,9 +133,7 @@ func modify_meshes(npc_list):
 
 		eyes.mesh = eyes.mesh.duplicate(true)
 		var mat = eyes.get_active_material(0)
-		print('selected texture: ', eye_texture)
 		mat.albedo_texture = eye_texture
-		print(mat.albedo_texture)
 		
 		#mouth
 		var mouth = skeleton3d.get_node("Mouth")
@@ -142,15 +145,12 @@ func modify_meshes(npc_list):
 
 		mouth.mesh = mouth.mesh.duplicate(true)
 		mat = mouth.get_active_material(0)
-		print('selected texture: ', eye_texture)
 		mat.albedo_texture = mouth_texture
-		print(mat.albedo_texture)
 		
 		#randomize hair
 		size = dict_hair.size()
 		idx = randi() % size
 		var random_hair = dict_hair.keys()[idx]
-		print(random_hair)
 		
 		var hair_mesh = dict_hair[random_hair]
 		var hair = MeshInstance3D.new()

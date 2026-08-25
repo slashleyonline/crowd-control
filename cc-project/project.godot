@@ -28,6 +28,8 @@ window/stretch/aspect="expand"
 
 Interactable=""
 Door=""
+Chair=""
+npc=""
 
 [input]
 

@@ -3,8 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://cy28nlv0fmbqd" path="res://Textures/PNG/Green/texture_10.png" id="1_caebq"]
 [ext_resource type="Texture2D" uid="uid://brh31mokx1nat" path="res://Textures/PNG/Orange/texture_10.png" id="2_alba5"]
 [ext_resource type="Texture2D" uid="uid://c5wmv8ho8douw" path="res://Textures/PNG/Dark/texture_01.png" id="3_u2fab"]
-[ext_resource type="Script" uid="uid://dvcybdycmv1wc" path="res://Scripts/crowdAgent.gd" id="4_estwp"]
-[ext_resource type="PackedScene" uid="uid://cp4w67d83rfgb" path="res://Scenes/ped_base.tscn" id="5_ti7xu"]
+[ext_resource type="PackedScene" uid="uid://sf8l2cyjh4x" path="res://Scenes/pedestrian.tscn" id="4_estwp"]
 [ext_resource type="PackedScene" uid="uid://csyet3k6vb4mr" path="res://Scenes/Player.tscn" id="5_y28qt"]
 [ext_resource type="PackedScene" uid="uid://dputl0ieurdkh" path="res://Scenes/Boundary.tscn" id="6_ti7xu"]
 [ext_resource type="Script" uid="uid://dnl08x4d0fxrc" path="res://Scripts/crowdSpawner.gd" id="7_hqie5"]
@@ -14,6 +13,8 @@
 [ext_resource type="ArrayMesh" uid="uid://dea3slaw3tsm" path="res://Models/Player/Cosmetic/Hair/Curly.tres" id="11_a73le"]
 [ext_resource type="ArrayMesh" uid="uid://b3h50r8bvn2n5" path="res://Models/Player/Cosmetic/Hair/FlatTop.tres" id="12_32bap"]
 [ext_resource type="ArrayMesh" uid="uid://du7nl7mwc3cyu" path="res://Models/Player/Cosmetic/Hair/Long.tres" id="13_lo1h7"]
+[ext_resource type="Script" uid="uid://bgvwqaaku5h3q" path="res://Scenes/chair_check.gd" id="14_t5y7c"]
+[ext_resource type="PackedScene" uid="uid://cjrhaas6k2ho6" path="res://Scenes/chair.tscn" id="15_t5y7c"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rvu7i"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -82,10 +83,6 @@ albedo_texture = ExtResource("3_u2fab")
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_hqie5"]
 data = PackedVector3Array(-4.5, -0.5, 4, -4.5, -0.5, -4, -4.5, 0.5, -4, 4.5, -0.5, -4, -4.5, -0.5, -4, -4.5, -0.5, 4, -4.5, 0.5, -4, -4.5, -0.5, -4, 4.5, -0.5, -4, -4.5, 0.5, -4, -4.5, 0.5, 4, -4.5, -0.5, 4, -4.5, -0.5, 4, -4.5, 0.5, 4, 4.5, 0.5, 4, 4.5, 0.5, 4, -4.5, 0.5, 4, -4.5, 0.5, -4, -4.5, -0.5, 4, 4.5, -0.5, 4, 4.5, -0.5, -4, 4.5, 0.5, 4, 4.5, -0.5, 4, -4.5, -0.5, 4, 4.5, -0.5, -4, 4.5, -0.5, 4, 4.5, 0.5, 4, 4.5, -0.5, -4, 4.5, 0.5, -4, -4.5, 0.5, -4, -4.5, 0.5, -4, 4.5, 0.5, -4, 4.5, 0.5, 4, 4.5, 0.5, 4, 4.5, 0.5, -4, 4.5, -0.5, -4)
 
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_5glt3"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_rmxdl"]
-
 [node name="AdvancedLevel" type="Node3D" unique_id=591470147]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=473693113]
@@ -99,6 +96,7 @@ shadow_enabled = true
 navigation_mesh = SubResource("NavigationMesh_2mnig")
 
 [node name="House" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1471686525]
+collision_mask = 3
 
 [node name="HouseWall" type="CSGBox3D" parent="NavigationRegion3D/House" unique_id=315914904]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
@@ -156,6 +154,7 @@ shape = SubResource("ConcavePolygonShape3D_ti7xu")
 
 [node name="House4" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1922853267]
 transform = Transform3D(-0.25881904, 0, 0.9659258, 0, 1, 0, -0.9659258, 0, -0.25881904, -35, 0, 30)
+collision_mask = 3
 
 [node name="HouseWall" type="CSGBox3D" parent="NavigationRegion3D/House4" unique_id=1266964973]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
@@ -213,6 +212,7 @@ shape = SubResource("ConcavePolygonShape3D_ti7xu")
 
 [node name="House2" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1653418695]
 transform = Transform3D(0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, 0.70710677, -38.3976, 0, -12)
+collision_mask = 3
 
 [node name="HouseWall" type="CSGBox3D" parent="NavigationRegion3D/House2" unique_id=477795604]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
@@ -270,6 +270,7 @@ shape = SubResource("ConcavePolygonShape3D_ti7xu")
 
 [node name="House3" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1724650741]
 transform = Transform3D(-0.7071069, 0, -0.70710665, 0, 1, 0, 0.70710665, 0, -0.7071069, 28.602402, 0, 34.093483)
+collision_mask = 3
 
 [node name="HouseWall" type="CSGBox3D" parent="NavigationRegion3D/House3" unique_id=1230466573]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
@@ -326,6 +327,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 4, 7)
 shape = SubResource("ConcavePolygonShape3D_ti7xu")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1676773016]
+collision_layer = 5
+collision_mask = 3
 
 [node name="Ground" type="CSGBox3D" parent="NavigationRegion3D/StaticBody3D" unique_id=403588300]
 material_override = SubResource("StandardMaterial3D_pagjx")
@@ -335,6 +338,7 @@ size = Vector3(120, 1, 120)
 shape = SubResource("ConcavePolygonShape3D_t5y7c")
 
 [node name="StaticBody3D2" type="StaticBody3D" parent="NavigationRegion3D" unique_id=580702719]
+collision_mask = 3
 
 [node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D/StaticBody3D2" unique_id=2089899201]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -17)
@@ -379,6 +383,7 @@ shape = SubResource("ConcavePolygonShape3D_2v6ss")
 [node name="Non-Navigation Map Areas" type="Node3D" parent="." unique_id=1981706921]
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Non-Navigation Map Areas" unique_id=857048218]
+collision_mask = 3
 
 [node name="HouseWall9" type="CSGBox3D" parent="Non-Navigation Map Areas/StaticBody3D" unique_id=1338504749]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 2.3841858e-07, 5, 3.5)
@@ -390,6 +395,7 @@ transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 2.38
 shape = SubResource("ConcavePolygonShape3D_hqie5")
 
 [node name="StaticBody3D2" type="StaticBody3D" parent="Non-Navigation Map Areas" unique_id=1514924767]
+collision_mask = 3
 
 [node name="HouseWall10" type="CSGBox3D" parent="Non-Navigation Map Areas/StaticBody3D2" unique_id=662941530]
 transform = Transform3D(0.70710695, 0, 0.7071066, 0, 1, 0, -0.7071066, 0, 0.70710695, 26.12753, 5, 31.618608)
@@ -401,6 +407,7 @@ transform = Transform3D(0.70710695, 0, 0.7071066, 0, 1, 0, -0.7071066, 0, 0.7071
 shape = SubResource("ConcavePolygonShape3D_hqie5")
 
 [node name="StaticBody3D3" type="StaticBody3D" parent="Non-Navigation Map Areas" unique_id=1478086128]
+collision_mask = 3
 
 [node name="HouseWall8" type="CSGBox3D" parent="Non-Navigation Map Areas/StaticBody3D3" unique_id=1780706469]
 transform = Transform3D(0.25881895, 0, -0.9659258, 0, 1, 0, 0.9659258, 0, 0.25881895, -31.619259, 5, 29.094133)
@@ -412,6 +419,7 @@ transform = Transform3D(0.25881895, 0, -0.9659258, 0, 1, 0, 0.9659258, 0, 0.2588
 shape = SubResource("ConcavePolygonShape3D_hqie5")
 
 [node name="StaticBody3D4" type="StaticBody3D" parent="Non-Navigation Map Areas" unique_id=444324026]
+collision_mask = 3
 
 [node name="HouseWall11" type="CSGBox3D" parent="Non-Navigation Map Areas/StaticBody3D4" unique_id=2015324685]
 transform = Transform3D(-0.7071068, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071068, -35.922726, 5, -9.525126)
@@ -422,39 +430,13 @@ size = Vector3(9, 1, 8)
 transform = Transform3D(-0.7071068, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.7071068, -35.922726, 5, -9.525126)
 shape = SubResource("ConcavePolygonShape3D_hqie5")
 
-[node name="Pedestrian" type="CharacterBody3D" parent="." unique_id=319213615 groups=["NPC"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9430935, -1.9255452)
-script = ExtResource("4_estwp")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestrian" unique_id=88462388]
-shape = SubResource("CylinderShape3D_5glt3")
-
-[node name="PedBase" parent="Pedestrian" unique_id=181494089 instance=ExtResource("5_ti7xu")]
-transform = Transform3D(-1.3113417e-08, 0, -0.3, 0, 0.3, 0, 0.3, 0, -1.3113417e-08, 0, -0.2, 0)
-
-[node name="InteractionRayCast" type="RayCast3D" parent="Pedestrian/PedBase" unique_id=87017908]
-transform = Transform3D(0.99999994, 0, -8.881784e-16, 0, 0.99999994, 0, 8.881784e-16, 0, 0.99999994, 0, 0, 0)
-target_position = Vector3(3, 0, 0)
-debug_shape_custom_color = Color(1, 0.23745415, 0.5664999, 1)
-debug_shape_thickness = 5
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Pedestrian" unique_id=2019590041]
-
-[node name="Label3D" type="Label3D" parent="Pedestrian" unique_id=117608791]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.312697, 0)
-billboard = 1
-text = "None"
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestrian" unique_id=838856719]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-visible = false
-mesh = SubResource("CylinderMesh_rmxdl")
-
 [node name="Camera3D" type="Camera3D" parent="." unique_id=596827014]
 transform = Transform3D(1, 0, 0, 0, 0.7077299, 0.7064831, 0, -0.7064831, 0.7077299, 0, 10.558638, 18.530235)
 
 [node name="Player" parent="." unique_id=31535995 instance=ExtResource("5_y28qt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 14)
+collision_layer = 2
+collision_mask = 3
 
 [node name="Boundary" parent="." unique_id=1457880342 instance=ExtResource("6_ti7xu")]
 
@@ -472,14 +454,39 @@ dict_hair = {
 [node name="Door" parent="." unique_id=541325732 instance=ExtResource("8_alba5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.04465604, 0.477579, 7.2427692)
 
+[node name="MeshInstance3D" parent="Door/StaticBody3D" parent_id_path=PackedInt32Array(541325732, 2035355332) index="2" unique_id=1602374061]
+layers = 3
+
 [node name="Door4" parent="." unique_id=107699591 instance=ExtResource("8_alba5")]
 transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, 23.51528, 0.47757804, 28.955631)
 
 [node name="Door2" parent="." unique_id=1399883545 instance=ExtResource("8_alba5")]
 transform = Transform3D(-0.25881904, 0, 0.9659258, 0, 1, 0, -0.9659258, 0, -0.25881904, -28.044657, 0.477579, 28.24277)
 
+[node name="MeshInstance3D" parent="Door2/StaticBody3D" parent_id_path=PackedInt32Array(1399883545, 2035355332) index="2" unique_id=1602374061]
+layers = 3
+
 [node name="Door3" parent="." unique_id=274558027 instance=ExtResource("8_alba5")]
 transform = Transform3D(0.70710695, 0, 0.7071068, 0, 1, 0, -0.7071068, 0, 0.70710695, -33.16565, 0.477579, -6.8313136)
+
+[node name="MeshInstance3D" parent="Door3/StaticBody3D" parent_id_path=PackedInt32Array(274558027, 2035355332) index="2" unique_id=1602374061]
+layers = 3
+
+[node name="Chair" parent="." unique_id=723104967 instance=ExtResource("15_t5y7c")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.670685, 1.250001, 35.780106)
+script = ExtResource("14_t5y7c")
+
+[node name="Chair2" parent="." unique_id=635540468 instance=ExtResource("15_t5y7c")]
+transform = Transform3D(-0.70710677, 0, 0.70710677, 0, 1, 0, -0.70710677, 0, -0.70710677, 9.160051, 1.250001, 31.521503)
+script = ExtResource("14_t5y7c")
+
+[node name="Chair3" parent="." unique_id=188454294 instance=ExtResource("15_t5y7c")]
+transform = Transform3D(-0.7071067, 0, -0.7071068, 0, 1, 0, 0.7071068, 0, -0.7071067, 3.1600513, 1.250001, 31.521503)
+script = ExtResource("14_t5y7c")
+
+[node name="Pedestrian" parent="." unique_id=319213615 instance=ExtResource("4_estwp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.541753, 9.491426)
+disable_mode = 1
 
 [editable path="Door"]
 [editable path="Door4"]

@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 #with this, each state can handle its own update logic
 class IdleState:
+	
 	func update(agent):
 		#stand still and count the wait down. only when it runs out do we
 		#pick a new destination, so we ask for one path instead of one per frame.
@@ -12,6 +13,21 @@ class IdleState:
 			return Vector3.ZERO
 
 		if agent.idle_timer <= 0.0:
+			#random chance that agent seeks out a chair
+
+			if (randf() <= 0.05):
+				# set target location to a random chair on the map
+				if agent.chairs:
+					var idx= randi() % agent.chairs.size()
+					var target_chair = agent.chairs[idx]
+
+					#move to seeking chair state
+					print(target_chair.global_position)
+					agent.update_target_location(target_chair.global_position)
+					agent.locate_chair_state.chair = target_chair
+					agent.state = agent.locate_chair_state
+					return Vector3.ZERO
+
 			agent.randomize_target_location()
 			agent.state = agent.walking_state
 
@@ -172,9 +188,6 @@ class DoorState:
 			if agent.nav_agent.is_navigation_finished():
 				agent.door_state.current_door_state = agent.door_state.open_door_state
 				return Vector3.ZERO
-			if agent.nav_agent.is_navigation_finished():
-				agent.start_idle()
-				return Vector3.ZERO
 
 			#if we are barely moving we are probably jammed against someone.
 			#give up on this destination rather than pushing forever.
@@ -207,6 +220,66 @@ class DoorState:
 			return Vector3.ZERO
 			
 
+class LocateChairState:
+	#chair object to be located. needs to be set
+	var chair = null
+
+	func update(agent):
+		if agent.global_position.distance_to(agent.nav_agent.target_location) < 4 \
+			and !chair.check_sitting():
+			print('found chair')
+			agent.sitting_state.chair = chair
+			chair.interact(agent)
+			agent.state = agent.sitting_state
+		elif chair.check_sitting():
+			agent.state = agent.idle_state
+
+		#if we are barely moving we are probably jammed against someone.
+		#give up on this destination rather than pushing forever.
+		if agent.is_stuck():
+			agent.state = agent.idle_state
+
+		var next_location = agent.nav_agent.get_next_path_position()
+		var direction = next_location - agent.global_position
+
+		#the path sits on the navmesh, which is below the agent's centre.
+		#flattening y stops that downward slope from stealing horizontal
+		#speed and from fighting the floor collision.
+		direction.y = 0
+
+		return direction.normalized() * agent.speed
+
+class ChairSittingState:
+	#check if player is in the proper position
+	var npc_reoriented = false
+	#chair object to be located. needs to be set
+	var chair = null
+	var timer = 0
+
+	func update(agent):
+		if !npc_reoriented:
+			move_npc(agent, true)
+		
+		timer += agent.get_physics_process_delta_time()
+		if timer > agent.sitting_timer:
+			chair.interact(agent)
+			agent.sitting_state.chair = null
+			agent.state = agent.idle_state
+			move_npc(agent, false)
+			
+			return Vector3.ZERO
+
+		agent.anim_player.play("Sitting")
+		agent.global_position = chair.global_position + Vector3(0,0,0)
+		return Vector3.ZERO
+	
+	func move_npc(agent, status):
+		var collision = agent.get_node("CollisionShape3D")
+		collision.disabled = status
+		if chair != null:
+			agent.global_position = chair.global_position
+		npc_reoriented = status
+
 #starts in the idle state
 var idle_state = IdleState.new()
 var walking_state = WalkingState.new()
@@ -215,6 +288,8 @@ var fleeing_state = FleeingState.new()
 var returning_state = ReturnState.new()
 var door_state = DoorState.new()
 var stare_state = StareState.new()
+var locate_chair_state = LocateChairState.new()
+var sitting_state = ChairSittingState.new()
 var state=idle_state
 
 #constant value for the distance an NPC should have from the player while in the fleeing state.
@@ -240,6 +315,9 @@ var state=idle_state
 
 #how long after fleeing before an npc resumes normal idle/walk behavior
 @export var return_cooldown = 2.0
+
+#how long does the pedestrian sit for?
+@export var sitting_timer = 30.0
 
 #how close the player must be before an idle npc may stare
 @export var stare_range = 8.0
@@ -272,11 +350,15 @@ var navigation_ready = false
 #used only so we can print when the fsm changes (see Output in Godot)
 var _debug_last_state = null
 
+#chairs to be located
+var chairs = null
+
 @onready var nav_agent = $NavigationAgent3D
 @onready var mesh = $PedBase
 @onready var skeleton = $PedBase/Armature/Skeleton3D
 @onready var interact_ray = $PedBase/InteractionRayCast
 @onready var label = $Label3D
+@onready var anim_player = $PedBase/AnimationPlayer
 
 var neck_bone = -1
 var head_bone = -1
@@ -304,6 +386,7 @@ func _ready():
 	#on the same frame
 	idle_timer = randf_range(0.0, max_idle_time)
 	fleeing_timer = randf_range(min_fleeing_time, max_fleeing_time)
+	sitting_timer = randf_range(30.0, 120.0)
 	randomize_target_location()
 	navigation_ready = true
 
@@ -445,6 +528,13 @@ func is_stuck() -> bool:
 		return true
 	return false
 
+func update_chair(chair_body):
+	print('updating chairs')
+	for i in chairs:
+		if chair_body.uid == chairs[i].uid:
+			var staticbody = chair_body.get_node("StaticBody3D")
+			chairs[i] = chair_body
+
 func fear_response(position, loudness):
 	#called when the CrowdEvent for explosions or gunshots fires a signal.
 	#depending on the position andd radius, pedestrian must switch to a fear state.
@@ -473,7 +563,6 @@ func _physics_process(_delta: float) -> void:
 	
 	var new_velocity=state.update(self)
 
-	var anim_player = mesh.get_node("AnimationPlayer")
 	#rotate the model in the direction of movement; stare handles its own facing.
 	if new_velocity != Vector3.ZERO and new_velocity != null:
 		mesh.rotation.y = rotate_toward(mesh.rotation.y,
@@ -530,7 +619,7 @@ func check_door_interact():
 func apply_velocity(new_velocity: Vector3):
 	#gravity builds up over time, so add to the fall speed we already
 	#have instead of replacing it with a fixed value
-	if !is_on_floor():
+	if !is_on_floor() and state != sitting_state:
 		new_velocity.y = velocity.y + get_gravity().y * get_physics_process_delta_time()
 	velocity = new_velocity
 

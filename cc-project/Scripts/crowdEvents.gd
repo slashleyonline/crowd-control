@@ -11,6 +11,9 @@ signal gunshot(position: Vector3, loudness: float)
 #an explosion at this position. npcs inside radius should react.
 signal explosion(position: Vector3, radius: float)
 
+#someone sat in a chair, making npcs change state or avoid sitting in the chair.
+signal chair_updated(chair_body)
+
 #how far a gunshot carries by default. the map is 40x40 so this covers most of it.
 const GUNSHOT_LOUDNESS = 50.0
 
@@ -20,6 +23,8 @@ func report_gunshot(position: Vector3, loudness: float = GUNSHOT_LOUDNESS):
 func report_explosion(position: Vector3, radius: float):
 	explosion.emit(position, radius)
 
+func update_chair(chair_body):
+	chair_updated.emit(chair_body)
 
 #TEMPORARY: press G to fake a gunshot at the camera so the npc danger states
 #can be tested before the player controller exists. delete once the player fires.

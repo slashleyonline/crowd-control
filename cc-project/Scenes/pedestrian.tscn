@@ -35,7 +35,9 @@ blend_shape_mode = 0
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_rmxdl"]
 
-[node name="Pedestrian" type="CharacterBody3D" unique_id=319213615 groups=["NPC"]]
+[node name="Pedestrian" type="CharacterBody3D" unique_id=319213615 groups=["npc"]]
+collision_layer = 2
+collision_mask = 3
 script = ExtResource("1_epmes")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=88462388]
@@ -51,9 +53,6 @@ bones/4/rotation = Quaternion(0.44285983, -0.18072043, 0.53540224, 0.69610333)
 bones/6/rotation = Quaternion(-0.24122268, -0.013698867, -0.05501879, 0.9688121)
 bones/7/rotation = Quaternion(0.0009784643, 3.2988673e-06, 0.1097666, 0.9939569)
 bones/8/rotation = Quaternion(-0.0015433314, -2.3915874e-07, -0.71846706, 0.6955593)
-
-[node name="Eyes" parent="PedBase/Armature/Skeleton3D" index="1" unique_id=876665287]
-mesh = null
 
 [node name="Mouth" parent="PedBase/Armature/Skeleton3D" index="2" unique_id=1135133202]
 mesh = SubResource("ArrayMesh_cl0mi")
