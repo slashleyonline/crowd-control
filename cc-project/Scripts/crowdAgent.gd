@@ -425,7 +425,7 @@ var state=idle_state
 #how far above the seat surface to put the hip joint. the bone sits inside the
 #mesh rather than on the skin, so a small lift stops the seat clipping into the
 #backside. everything else about the placement is measured at runtime.
-@export var sit_surface_offset = 0.09
+@export var sit_surface_offset = 0.15
 
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
@@ -524,6 +524,13 @@ var chairs = null
 
 var neck_bone = -1
 var head_bone = -1
+var hip_bone_left = -1
+var hip_bone_right = -1
+
+#the player never changes, but try_start_stare() runs every frame for every
+#idle npc, so looking it up in the scene tree each time is a real cost once the
+#crowd is large. look it up once and keep it.
+var cached_player = null
 
 func _ready():
 	#lets the player's aim raycast tell npcs apart from walls and floors
@@ -535,6 +542,11 @@ func _ready():
 	#bone indices kept so we can reset if a look pose ever gets stuck
 	neck_bone = skeleton.find_bone("Neck")
 	head_bone = skeleton.find_bone("Head")
+
+	#find_bone walks the bone names, so resolve these once rather than every
+	#frame while seated
+	hip_bone_left = skeleton.find_bone("Hip.L")
+	hip_bone_right = skeleton.find_bone("Hip.R")
 
 	speed = randf_range(min_speed, max_speed)
 	last_position = global_position
@@ -734,7 +746,7 @@ func start_frozen():
 	freeze_timer = freeze_duration
 
 	#note where the threat is now, while we can still see who it is
-	var player = get_tree().get_first_node_in_group("player")
+	var player = get_player()
 	if player != null:
 		aim_threat_position = player.global_position
 
@@ -746,9 +758,16 @@ func start_returning():
 	randomize_target_location()
 	state = returning_state
 
+#the player, looked up once and remembered
+func get_player():
+	if cached_player == null or not is_instance_valid(cached_player):
+		cached_player = get_tree().get_first_node_in_group("player")
+	return cached_player
+
+
 #roll whether an idle npc should look at the player this frame
 func try_start_stare() -> bool:
-	var player = get_tree().get_first_node_in_group("player")
+	var player = get_player()
 	if player == null:
 		return false
 	if global_position.distance_to(player.global_position) > stare_range:
@@ -802,13 +821,11 @@ func chair_seat_point(chair) -> Vector3:
 
 #where the pelvis actually is right now, taken from the posed skeleton
 func hip_world_position():
-	var left = skeleton.find_bone("Hip.L")
-	var right = skeleton.find_bone("Hip.R")
-	if left < 0 or right < 0:
+	if hip_bone_left < 0 or hip_bone_right < 0:
 		return null
 
-	var a = skeleton.global_transform * skeleton.get_bone_global_pose(left).origin
-	var b = skeleton.global_transform * skeleton.get_bone_global_pose(right).origin
+	var a = skeleton.global_transform * skeleton.get_bone_global_pose(hip_bone_left).origin
+	var b = skeleton.global_transform * skeleton.get_bone_global_pose(hip_bone_right).origin
 	return (a + b) * 0.5
 
 

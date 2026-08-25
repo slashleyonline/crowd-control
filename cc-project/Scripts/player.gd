@@ -25,6 +25,14 @@ var aim_target = null
 
 @onready var camera = $Camera3D
 @onready var aim_ray = $Camera3D/RayCast3D
+@onready var debug_label = $HUD/DebugLabel
+
+#on-screen readout of frame rate and what the crowd is doing. refreshed a few
+#times a second rather than every frame, because counting states means walking
+#the whole crowd, which is exactly the per-frame work we try to avoid.
+@export var show_debug = true
+const DEBUG_REFRESH = 0.25
+var debug_timer = 0.0
 
 func _ready():
 	#so npcs can find us for stare / reactions without a hard scene path
@@ -49,6 +57,11 @@ func _unhandled_input(event):
 
 		#stops the camera tipping over backwards at the top and bottom
 		camera.rotation.x = clamp(camera.rotation.x, -PI / 2, PI / 2)
+
+	#F3 hides the readout, for a clean demo capture
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F3:
+		show_debug = not show_debug
+		debug_label.visible = show_debug
 
 	#set off an explosion where we are looking
 	if event.is_action_pressed("explode"):
@@ -89,6 +102,37 @@ func _physics_process(delta):
 		velocity = Vector3.ZERO
 
 	update_aim()
+	update_debug(delta)
+
+
+#refresh the on-screen readout
+func update_debug(delta):
+	if not show_debug:
+		return
+
+	debug_timer -= delta
+	if debug_timer > 0.0:
+		return
+	debug_timer = DEBUG_REFRESH
+
+	var npcs = get_tree().get_nodes_in_group("npc")
+	var counts = {}
+	for npc in npcs:
+		var state_label = npc._state_label(npc.state)
+		counts[state_label] = counts.get(state_label, 0) + 1
+
+	#busiest states first, so the interesting ones are easy to spot
+	var names = counts.keys()
+	names.sort_custom(func(a, b): return counts[a] > counts[b])
+
+	var parts = []
+	for state_name in names:
+		parts.append("%s %d" % [state_name, counts[state_name]])
+
+	debug_label.text = "FPS %d   NPCs %d
+%s
+[F3 hides this]" % [
+		Engine.get_frames_per_second(), npcs.size(), "   ".join(parts)]
 
 
 #work out which npc the gun is pointed at, if any
