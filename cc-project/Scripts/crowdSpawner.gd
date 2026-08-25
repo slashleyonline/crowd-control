@@ -131,13 +131,15 @@ func form_march_group(npc_list, map):
 
 	#place them straight into formation. left to walk there themselves they
 	#spend the first minute of the demo sprinting across the map.
-	var ahead = leader
+	#stand them in a straight line behind the leader. the exact direction does
+	#not matter: within a second they are following the leader's breadcrumb
+	#trail and the line takes its real shape from wherever the leader walks.
+	var behind = Vector3(0, 0, 1)
 	for i in range(1, march_group_size):
 		var follower = npc_list[i]
-		var slot = ahead.global_position - leader.march_forward * follower.march_spacing
+		var slot = leader.global_position + behind * (follower.march_spacing * i)
 		follower.global_position = NavigationServer3D.map_get_closest_point(map, slot) + Vector3(0, 1.0, 0)
-		follower.join_march(leader, ahead, i)
-		ahead = follower
+		follower.join_march(leader, i)
 
 	print("marching group: ", march_group_size - 1, " npcs following ", leader.name)
 

@@ -94,7 +94,6 @@ class MarchingState:
 	func update(agent):
 		if not agent.march_is_valid():
 			agent.march_leader = null
-			agent.march_ahead = null
 			agent.start_idle()
 			return Vector3.ZERO
 
@@ -474,8 +473,6 @@ var stare_target = null
 #marching line. followers hold a slot behind their leader; the leader itself
 #has no leader of its own and behaves like any other npc.
 var march_leader = null
-#the npc directly in front of us in the line (the leader, for the first one)
-var march_ahead = null
 var march_slot = 0
 var is_march_leader = false
 var march_repath_timer = 0.0
@@ -490,8 +487,6 @@ var march_trail: Array[Vector3] = []
 #history, plenty for any line we would actually show.
 const MARCH_TRAIL_STEP = 0.4
 const MARCH_TRAIL_MAX = 64
-#the leader's last travel direction, so followers know where "behind" is
-var march_forward = Vector3(0, 0, -1)
 
 #true while the player's gun is pointed at this npc. set by the player,
 #read by the fsm - a FrozenState can just check this in its update().
@@ -606,16 +601,6 @@ func randomize_target_location():
 	var map = nav_agent.get_navigation_map()
 	update_target_location(NavigationServer3D.map_get_random_point(map, 1, true))
 
-func random_target_location_outside_radius(position, radius):
-	#given a position and radius, find an area on the map outside of it.
-	var target_location = position
-	randomize_target_location()
-	
-	var attempts = 0
-	while (target_location.distance_to(position) <= radius and attempts < 30):
-		attempts += 1
-		randomize_target_location()
-
 func flee_radius(position, _radius):
 	# Given a threat position, pick somewhere to run that is away from it and
 	# actually reachable.
@@ -674,7 +659,7 @@ func _on_march_call(leader):
 	leader.march_followers += 1
 	#we walk to the leader first: MarchingState aims at their trail, and an
 	#empty trail just means "go stand where the leader is"
-	join_march(leader, leader, leader.march_followers)
+	join_march(leader, leader.march_followers)
 
 
 #stop leading and let everyone drift back to normal crowd behaviour
@@ -716,10 +701,9 @@ func march_slot_position() -> Vector3:
 	#trail is shorter than our place in the line, so aim at its oldest point
 	return trail[trail.size() - 1]
 
-#put this npc into a marching line behind "ahead", led overall by "leader"
-func join_march(leader, ahead, slot: int):
+#put this npc into a marching line at the given place behind the leader
+func join_march(leader, slot: int):
 	march_leader = leader
-	march_ahead = ahead
 	march_slot = slot
 	march_repath_timer = 0.0
 
