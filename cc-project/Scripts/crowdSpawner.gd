@@ -8,6 +8,14 @@ extends Node
 #prints the frame rate every few seconds so we can write the numbers down
 @export var show_fps = true
 
+#how many npcs walk together in a single-file marching line. 0 turns it off.
+#the first one is the leader and wanders normally; the rest follow behind it.
+@export var march_group_size = 0
+
+#a leader that sprints off can never be caught, so it walks a bit slower
+#than the people following it
+@export var march_leader_speed = 2.0
+
 var report_timer = 0.0
 
 #loading textures and models
@@ -39,6 +47,8 @@ func _ready():
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--crowd="):
 			crowd_size = int(arg.split("=")[1])
+		if arg.begins_with("--march="):
+			march_group_size = int(arg.split("=")[1])
 
 	#wait until the pedestrians already in the scene have their navigation
 	#working. once that is true the map is built and we can pick spawn points.
@@ -92,7 +102,39 @@ func build_crowd():
 	attach_signals(npcs)
 	modify_meshes(npcs)
 
+	#let the freshly spawned npcs finish their own navigation setup before
+	#we start ordering any of them into a line
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	form_march_group(npcs, map)
+
 	print("crowd size: ", crowd_size)
+
+
+#pick the first few npcs and line them up behind the first one
+func form_march_group(npc_list, map):
+	if march_group_size < 2 or npc_list.size() < march_group_size:
+		return
+
+	var leader = npc_list[0]
+	leader.is_march_leader = true
+
+	#the leader walks slower than its followers, otherwise a fast leader is
+	#simply uncatchable and the line never closes up
+	leader.speed = min(leader.speed, march_leader_speed)
+	leader.nav_agent.max_speed = leader.speed
+
+	#place them straight into formation. left to walk there themselves they
+	#spend the first minute of the demo sprinting across the map.
+	var ahead = leader
+	for i in range(1, march_group_size):
+		var follower = npc_list[i]
+		var slot = ahead.global_position - leader.march_forward * follower.march_spacing
+		follower.global_position = NavigationServer3D.map_get_closest_point(map, slot) + Vector3(0, 1.0, 0)
+		follower.join_march(leader, ahead, i)
+		ahead = follower
+
+	print("marching group: ", march_group_size - 1, " npcs following ", leader.name)
 
 
 func attach_signals(npc_list):

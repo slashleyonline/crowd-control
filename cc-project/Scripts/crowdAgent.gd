@@ -65,6 +65,59 @@ class WalkingState:
 
 		return direction.normalized() * agent.speed 
 
+class MarchingState:
+	#single file line. each npc follows whoever is directly in front of it
+	#rather than a fixed offset from the leader, so the line bends around
+	#corners instead of every slot swinging sideways when the leader turns.
+	func update(agent):
+		if not agent.march_is_valid():
+			agent.march_leader = null
+			agent.march_ahead = null
+			agent.start_idle()
+			return Vector3.ZERO
+
+		var slot = agent.march_slot_position()
+
+		#horizontal gap only, so a height difference does not read as lagging
+		var to_slot = slot - agent.global_position
+		to_slot.y = 0.0
+		var gap = to_slot.length()
+
+		#close enough. hold still rather than shuffling on the spot.
+		if gap < agent.march_slot_tolerance:
+			return Vector3.ZERO
+
+		var direction: Vector3
+
+		if gap <= agent.march_path_distance:
+			#the slot is close and almost always in open floor right behind
+			#someone, so walk straight at it. going through navigation here
+			#makes the agent stop about a metre short, because that is when
+			#NavigationAgent3D calls the trip finished.
+			direction = to_slot
+		else:
+			#far enough that a wall could be in the way, so use a real path.
+			#the slot moves every frame but re-pathing every frame is what
+			#makes follow behaviour expensive, so only a few times a second.
+			agent.march_repath_timer -= agent.get_physics_process_delta_time()
+			if agent.march_repath_timer <= 0.0 or agent.is_stuck():
+				agent.march_repath_timer = agent.march_repath_interval
+				agent.update_target_location(slot)
+
+			var next_location = agent.nav_agent.get_next_path_position()
+			direction = next_location - agent.global_position
+			direction.y = 0.0
+
+		#marchers still open doors like everyone else
+		agent.check_door_interact()
+
+		#hurry a little when the line has stretched out, so it closes back up
+		var march_speed = agent.speed
+		if gap > agent.march_slot_tolerance * 3.0:
+			march_speed = agent.speed * 1.4
+
+		return direction.normalized() * march_speed
+
 class FrozenState:
 	#stand still while the gun is on us. when the timer runs out we flee,
 	#matching the readme: freeze briefly when threatened, then run.
@@ -215,6 +268,7 @@ var fleeing_state = FleeingState.new()
 var returning_state = ReturnState.new()
 var door_state = DoorState.new()
 var stare_state = StareState.new()
+var marching_state = MarchingState.new()
 var state=idle_state
 
 #constant value for the distance an NPC should have from the player while in the fleeing state.
@@ -249,6 +303,17 @@ var state=idle_state
 @export var stare_duration_min = 1.5
 @export var stare_duration_max = 3.5
 
+#marching: how far apart people stand in the line
+@export var march_spacing = 1.6
+#how close to our slot counts as being in place
+@export var march_slot_tolerance = 0.6
+#seconds between path updates while following a moving slot
+@export var march_repath_interval = 0.25
+#slots nearer than this are steered at directly instead of pathfound. the
+#navigation agent reports "arrived" about a metre out, which left followers
+#parked just short of their slot.
+@export var march_path_distance = 4.0
+
 #this npc's own rolled values
 var speed = 3.0
 var idle_timer = 0.0
@@ -257,6 +322,17 @@ var freeze_timer = 0.0
 var return_timer = 0.0
 var stare_timer = 0.0
 var stare_target = null
+
+#marching line. followers hold a slot behind their leader; the leader itself
+#has no leader of its own and behaves like any other npc.
+var march_leader = null
+#the npc directly in front of us in the line (the leader, for the first one)
+var march_ahead = null
+var march_slot = 0
+var is_march_leader = false
+var march_repath_timer = 0.0
+#the leader's last travel direction, so followers know where "behind" is
+var march_forward = Vector3(0, 0, -1)
 
 #true while the player's gun is pointed at this npc. set by the player,
 #read by the fsm - a FrozenState can just check this in its update().
@@ -374,8 +450,39 @@ func set_aimed_at(aimed: bool):
 	if aimed and state != frozen_state and state != fleeing_state:
 		start_frozen()
 
+#is the line we belong to still intact
+func march_is_valid() -> bool:
+	if march_ahead == null or not is_instance_valid(march_ahead):
+		return false
+	if march_leader == null or not is_instance_valid(march_leader):
+		return false
+	return true
+
+#stand one spacing behind whoever is directly in front of us
+func march_slot_position() -> Vector3:
+	return march_ahead.global_position - march_ahead.march_forward * march_spacing
+
+#put this npc into a marching line behind "ahead", led overall by "leader"
+func join_march(leader, ahead, slot: int):
+	march_leader = leader
+	march_ahead = ahead
+	march_slot = slot
+	march_repath_timer = 0.0
+
+	#the avoidance solver clamps whatever we hand it to max_speed, which would
+	#cancel out the catch-up boost below. give followers the headroom.
+	nav_agent.max_speed = speed * 1.5
+
+	state = marching_state
+
 #stand still for a random moment before walking somewhere new
 func start_idle():
+	#marchers rejoin their line instead of wandering off on their own. this is
+	#what lets a group scatter from a gunshot and then re-form afterwards.
+	if march_is_valid():
+		state = marching_state
+		return
+
 	idle_timer = randf_range(min_idle_time, max_idle_time)
 	state = idle_state
 
@@ -471,6 +578,12 @@ func _physics_process(_delta: float) -> void:
 	
 
 	
+	#remember which way we are heading so whoever is following us knows
+	#where "behind" is. three floats per agent per frame.
+	var flat_velocity = Vector3(velocity.x, 0.0, velocity.z)
+	if flat_velocity.length_squared() > 0.25:
+		march_forward = flat_velocity.normalized()
+
 	var new_velocity=state.update(self)
 
 	var anim_player = mesh.get_node("AnimationPlayer")
@@ -503,6 +616,8 @@ func _state_label(s) -> String:
 		return "Returning"
 	if s == stare_state:
 		return "Staring"
+	if s == marching_state:
+		return "Marching"
 	if s == door_state:
 		return "Door"
 	return "Unknown"
