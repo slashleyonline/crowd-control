@@ -136,6 +136,9 @@ func throw_explosion():
 	get_tree().current_scene.add_child(blast)
 	blast.global_position = spot
 
+	#only now that it is actually in the right place do we tell the crowd
+	blast.detonate()
+
 	print("explosion at ", spot, " radius ", explosion_radius)
 
 

@@ -26,8 +26,13 @@ func _ready():
 		fade_material = base.duplicate()
 		ball.set_surface_override_material(0, fade_material)
 
-	#tell the crowd first so the reaction lines up with the flash
+
+#announce the blast. this is deliberately NOT done in _ready(): add_child()
+#runs _ready() immediately, before the caller has had a chance to place us, so
+#reporting there told the crowd every explosion happened at the world origin.
+func detonate():
 	CrowdEvents.report_explosion(global_position, radius)
+
 
 func _process(delta):
 	elapsed += delta

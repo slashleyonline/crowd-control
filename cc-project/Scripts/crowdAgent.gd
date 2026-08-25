@@ -353,7 +353,7 @@ class ChairSittingState:
 			return Vector3.ZERO
 
 		agent.anim_player.play("Sitting")
-		agent.global_position = agent.chair_sit_position(chair)
+		agent.snap_to_seat(chair)
 		return Vector3.ZERO
 	
 	func move_npc(agent, status):
@@ -363,7 +363,7 @@ class ChairSittingState:
 		#chair (a gunshot, being aimed at) left collision off for good and they
 		#fell through the floor.
 		if chair != null:
-			agent.global_position = agent.chair_sit_position(chair)
+			agent.snap_to_seat(chair)
 
 		if not status:
 			#the chair rotated our whole body to face it. everywhere else only
@@ -414,24 +414,10 @@ var state=idle_state
 #destination is actually reachable instead of a point past the boundary.
 @export var flee_distance = 25.0
 
-#where to put an npc, relative to the chair node's origin, so the sitting pose
-#lands properly.
-#
-#measured from the rig: the Hip bones sit 0.03 below the npc origin and the
-#Foot bones 0.63 below it. those are joints, though, not the visible surface -
-#Hip is inside the pelvis and Foot is the ankle - so lining the bones up with
-#the seat left the box poking up into the body and the toes through the floor.
-#lifting by about 0.08 puts the visible backside on the seat and the soles on
-#the ground.
-#
-#this is the dial to turn if the pose still looks off: higher = sits higher.
-@export var sit_height_offset = 0.01
-
-#how far forward of the chair's centre to sit. seated thighs slope down toward
-#the knees, but the seat's top face is flat, so a seat centred under the pelvis
-#pokes up through the legs. sitting nearer the front edge puts the thighs out
-#past the box instead of inside it.
-@export var sit_forward_offset = 0.16
+#how far above the seat surface to put the hip joint. the bone sits inside the
+#mesh rather than on the skin, so a small lift stops the seat clipping into the
+#backside. everything else about the placement is measured at runtime.
+@export var sit_surface_offset = 0.09
 
 #how long does the pedestrian sit for?
 @export var sitting_timer = 30.0
@@ -783,19 +769,44 @@ func clear_head_look():
 
 #where to stand an npc so it looks seated: over the chair, but at the height
 #it would normally stand at rather than sunk into the chair's own origin
-func chair_sit_position(chair) -> Vector3:
-	#chair.gd turns us to face the chair's +x, so that is our "forward"
-	var forward = chair.global_transform.basis.x
-	forward.y = 0.0
-	if forward.length_squared() > 0.0001:
-		forward = forward.normalized()
-	else:
-		forward = Vector3.ZERO
+#the top of the chair's own mesh, so this keeps working if the chair is resized
+func chair_seat_point(chair) -> Vector3:
+	var seat_y = chair.global_position.y
+	var seat_mesh = chair.get_node_or_null("MeshInstance3D")
+	if seat_mesh != null:
+		seat_y = seat_mesh.global_position.y + seat_mesh.get_aabb().end.y
 
 	return Vector3(
 		chair.global_position.x,
-		chair.global_position.y + sit_height_offset,
-		chair.global_position.z) + forward * sit_forward_offset
+		seat_y + sit_surface_offset,
+		chair.global_position.z)
+
+
+#where the pelvis actually is right now, taken from the posed skeleton
+func hip_world_position():
+	var left = skeleton.find_bone("Hip.L")
+	var right = skeleton.find_bone("Hip.R")
+	if left < 0 or right < 0:
+		return null
+
+	var a = skeleton.global_transform * skeleton.get_bone_global_pose(left).origin
+	var b = skeleton.global_transform * skeleton.get_bone_global_pose(right).origin
+	return (a + b) * 0.5
+
+
+#slide ourselves so the pelvis lands on the seat. we correct from the posed
+#skeleton instead of hard-coding an offset, because the right number depends on
+#the model and the animation, and guessing it produced npcs sitting through the
+#chair, beside it, and hovering over it in turn.
+func snap_to_seat(chair):
+	var hips = hip_world_position()
+	if hips == null:
+		#no skeleton to measure, so fall back to the chair's own position
+		global_position = chair_seat_point(chair)
+		return
+
+	global_position += chair_seat_point(chair) - hips
+
 
 #true once we have spent stuck_give_up_time hardly moving while walking
 func is_stuck() -> bool:
